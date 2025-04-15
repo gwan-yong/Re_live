@@ -75,7 +75,7 @@ class _FAButtonMenuState extends State<FAButtonMenu>
               label: '사진 찍기',
               action: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const CameraScreen()),
+                MaterialPageRoute(builder: (context) => CameraScreen()),
               ),
             ),
             FABItem(
