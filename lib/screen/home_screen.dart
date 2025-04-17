@@ -4,6 +4,8 @@ import 'package:re_live/screen/event_screen.dart';
 import 'package:re_live/widget/completed_event_list.dart';
 import 'package:re_live/widget/scheduled_event_list.dart';
 
+import '../widget/event_setting/date_picker_box.dart';
+import '../widget/event_setting/date_setting.dart';
 import '../widget/fab_menu_button.dart';
 
 class HomeScreen extends StatelessWidget{

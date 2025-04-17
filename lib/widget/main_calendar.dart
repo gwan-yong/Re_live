@@ -175,7 +175,7 @@ class _MainCalendarState extends State<MainCalendar> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const EventScreen()),
+                        MaterialPageRoute(builder: (context) => EventScreen()),
                       );
                     },
                   icon: Icon(Icons.add),
