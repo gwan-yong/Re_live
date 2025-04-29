@@ -71,7 +71,7 @@ class _RepeatSetting extends State<RepeatSetting> {
                           final isSelected = selectedType == type;
 
                           return Padding(
-                            padding: const EdgeInsets.all(.0),
+                            padding: const EdgeInsets.only(right : 4),
                             child: GestureDetector(
                               onTap: () {
                                 setState(() {
