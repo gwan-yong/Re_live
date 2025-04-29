@@ -37,8 +37,8 @@ class EventTitle extends StatelessWidget {
               flex: 1,
               child: TextField(
                 decoration: InputDecoration(
-                  labelText: '제목',
-                  labelStyle: TextStyle(
+                  hintText: '제목',
+                  hintStyle: TextStyle(
                     color: Colors.black.withOpacity(0.6),
                     fontSize: 20,
                   ),
