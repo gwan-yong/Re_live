@@ -11,7 +11,7 @@ class JournalScreen extends StatelessWidget{
         backgroundColor: Colors.white,
       ),
       body: SafeArea(
-          child: Text('data'),
+        child: Text('data'),
       ),
     );
   }
