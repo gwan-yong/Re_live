@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ios_color_picker/show_ios_color_picker.dart';
-import 'package:re_live/widget/event_setting/date_picker_box.dart';
 import 'package:re_live/widget/event_setting/date_setting.dart';
 import 'package:re_live/widget/event_setting/repeat_setting.dart';
 import '../theme/colors.dart';
