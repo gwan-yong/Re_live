@@ -60,6 +60,11 @@ class LocalDatabase extends _$LocalDatabase {
     return schedules;
   }
 
+  Future<int> deleteSchedule(int scheduleId) {
+    return (delete(scheduled)..where((tbl) => tbl.id.equals(scheduleId))).go();
+  }
+
+
 
   Future<List<ScheduledData>> getAllSchedules() {
     return select(scheduled).get();
