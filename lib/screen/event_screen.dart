@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:ios_color_picker/show_ios_color_picker.dart';
 import 'package:re_live/widget/event_setting/date_setting.dart';
 import 'package:re_live/widget/event_setting/repeat_setting.dart';
+import '../database/drift_database.dart';
 import '../theme/colors.dart';
 import '../widget/event_setting/event_title.dart';
+import 'package:drift/drift.dart' as drift;
 import 'home_screen.dart';
 
 class EventScreen extends StatefulWidget {
@@ -15,6 +17,35 @@ class _EventScreen extends State<EventScreen> {
   Color backgroundColor = appBackgroundColor;
   IOSColorPickerController iosColorPickerController =
   IOSColorPickerController();
+
+  String title = '';
+  int color = 1;
+  DateTime selectedDate = DateTime.now();
+  int startTime = 480; // 8:00
+  bool endUsed = false;
+  int endTime = 540;   // 9:00
+  String repeatType = 'none';
+  bool repeatEndUsed = false;
+  DateTime repeatEndDate = DateTime.now();
+
+  final LocalDatabase db = LocalDatabase();
+
+  void _printAllSchedules(LocalDatabase db) async {
+    final schedules = await db.getAllSchedules();
+    for (final schedule in schedules) {
+      print('ID: ${schedule.id},'
+          ' Title: ${schedule.title},'
+          ' COLOR: ${schedule.color},'
+          ' Date: ${schedule.date}'
+          ' startTime: ${schedule.startTime},'
+          ' endUsed: ${schedule.endUsed},'
+          ' endTime: ${schedule.endTime},'
+          ' repeatType: ${schedule.repeateType},'
+          ' repeatEndUsed: ${schedule.repeatEndUsed},'
+          ' repeatEndDate: ${schedule.repeatEndDate},'
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -40,18 +71,86 @@ class _EventScreen extends State<EventScreen> {
                   onColorChanged: (color) {
                     setState(() => backgroundColor = color);
                   },
+                  onTitleChanged: (value) {
+                    title = value;
+                  },
                 ),
-                DateSetting(),
-                RepeatSetting(),
+                DateSetting(
+                  onStartChanged: (date, time) {
+                    setState(() {
+                      if (date != null) {
+                        selectedDate = date;
+                      }
+                      if (time != null) {
+                        // TimeOfDay를 분 단위로 변환
+                        startTime = time.hour * 60 + time.minute;
+                      }
+                      print(selectedDate);
+                      print(startTime);
+                    });
+                  },
+                  onEndChanged: (time) {
+                    setState(() {
+                      if (time != null) {
+                        endTime = time.hour * 60 + time.minute;
+                      }
+                      print(endTime);
+                    });
+                  },
+                  onEndUsedChanged: (used) {
+                    setState(() {
+                      endUsed = used;
+                      print(endUsed);
+                    });
+                  },
+                ),
+                RepeatSetting(
+                  onRepeatTypeChanged: (type) {
+                    setState(() {
+                      repeatType = type;
+                      print(type);
+                    });
+                  },
+                  onRepeatEndUsedChanged: (used){
+                    setState(() {
+                      repeatEndUsed = used;
+                      print(repeatEndUsed);
+                    });
+                  },
+                  onRepeatEndDateChanged: (date) {
+                    setState(() {
+                      if(date != null) {
+                        repeatEndDate = date;
+                      }
+                      print(date);
+                    });
+                  },
+                ),
                 const SizedBox(
                   height: 30,
                 ),
                 GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => HomeScreen())
+                  onTap: () async {
+                    final newSchedule = ScheduledCompanion(
+                      title: drift.Value(title),
+                      color: drift.Value(backgroundColor.value),
+                      date: drift.Value(selectedDate),
+                      startTime: drift.Value(startTime),
+                      endUsed: drift.Value(endUsed),
+                      endTime: drift.Value(endTime),
+                      repeateType: drift.Value(repeatType),
+                      repeatEndUsed: drift.Value(repeatEndUsed),
+                      repeatEndDate: drift.Value(repeatEndDate),
                     );
+
+                    await db.insertSchedule(newSchedule);
+
+                    // 등록 완료 후 홈으로 이동
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomeScreen()),
+                    );
+                    _printAllSchedules(db);
                   },
                   child:
                   Container(
@@ -72,9 +171,4 @@ class _EventScreen extends State<EventScreen> {
     );
   }
 }
-
-
-
-
-
 

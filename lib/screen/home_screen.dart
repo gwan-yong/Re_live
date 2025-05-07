@@ -3,10 +3,13 @@ import 'package:re_live/screen/calendar_screen.dart';
 import 'package:re_live/widget/completed_event_list.dart';
 import 'package:re_live/widget/scheduled_event_list.dart';
 
+import '../database/drift_database.dart';
 import '../widget/fab_menu_button.dart';
 
 class HomeScreen extends StatelessWidget{
-  const HomeScreen({Key ? key}) : super(key: key);
+  HomeScreen({Key ? key}) : super(key: key);
+  final LocalDatabase database = LocalDatabase();
+  final DateTime selectedDate = DateTime.now();
 
   Widget build(BuildContext context){
     return Scaffold(
@@ -40,7 +43,11 @@ class HomeScreen extends StatelessWidget{
                             '오늘 진행 예정 일정'
                         ),
                       ),
-                      ScheduledEventList(isScrollable: false),
+                      ScheduledEventList(
+                          isScrollable: false,
+                          database: database,
+                        selectedDate: selectedDate,
+                      ),
                     ],
                   ),
                 ],
@@ -73,7 +80,7 @@ class _title extends StatelessWidget{
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const CalendarScreen()),
+                MaterialPageRoute(builder: (context) => CalendarScreen()),
               );
             },
             icon: Icon(Icons.calendar_month),
