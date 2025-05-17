@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 import '../theme/colors.dart';
+import 'photos_upload_screen.dart'; // 사진 업로드 화면 import
 
 class CameraScreen extends StatefulWidget {
   @override
@@ -10,54 +13,102 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-  late CameraController _controller;
+  CameraController? _controller; // late 제거하고 nullable로 변경
   late Future<void> _initializeControllerFuture;
+  late List<CameraDescription> _cameras;
 
-  // 카메라 리스트를 가져오는 메소드
-  Future<void> _initializeCamera() async {
+  int _pictureCount = 0;
+  String? _rearImagePath;
+  String? _frontImagePath;
+
+  Future<void> _initializeCamera({bool useFrontCamera = false}) async {
     try {
-      if (Platform.isIOS && !Platform.isMacOS && !Platform.isAndroid) {
-        // 시뮬레이터에서는 카메라 기능을 사용할 수 없으므로 에러 처리
-        throw 'iOS 시뮬레이터에서는 카메라를 사용할 수 없습니다.';
-      }
+      _cameras = await availableCameras();
 
-      final cameras = await availableCameras();
-      final firstCamera = cameras.first; // 첫 번째 카메라 선택
+      final selectedCamera = useFrontCamera
+          ? _cameras.firstWhere((camera) => camera.lensDirection == CameraLensDirection.front)
+          : _cameras.firstWhere((camera) => camera.lensDirection == CameraLensDirection.back);
 
-      _controller = CameraController(firstCamera, ResolutionPreset.high);
+      _controller = CameraController(selectedCamera, ResolutionPreset.high);
 
-      // 카메라 초기화
-      await _controller.initialize(); // initialize() 완료까지 기다림
+      await _controller!.initialize();
+
       setState(() {
-        _initializeControllerFuture = Future.value(); // 초기화가 완료되었음을 상태 갱신
+        _initializeControllerFuture = Future.value(); // 초기화 완료 표시
       });
     } catch (e) {
       print('카메라 초기화 실패: $e');
       setState(() {
-        _initializeControllerFuture = Future.error(e); // 오류 상태 갱신
+        _initializeControllerFuture = Future.error(e); // 에러를 Future로 전달
+        _controller = null;
       });
     }
   }
 
+  Future<File> copyAssetToFile(String assetPath, String filename) async {
+    // 에셋을 메모리에 로드
+    final byteData = await rootBundle.load(assetPath);
+
+    // 임시 디렉토리 가져오기
+    final tempDir = await getTemporaryDirectory();
+    final file = File('${tempDir.path}/$filename');
+
+    // 에셋 데이터를 파일로 복사
+    await file.writeAsBytes(byteData.buffer.asUint8List());
+
+    return file; // FileImage로 사용 가능
+  }
+
+
   @override
   void initState() {
     super.initState();
-    _initializeControllerFuture = _initializeCamera(); // Future<void> 타입으로 수정
+    _initializeControllerFuture = _initializeCamera(useFrontCamera: false);
   }
 
   @override
   void dispose() {
-    _controller.dispose(); // 리소스 해제
+    try {
+      _controller?.dispose(); // null일 수 있으므로 안전하게
+    } catch (e) {
+      print('dispose 중 오류 발생: $e');
+    }
     super.dispose();
   }
 
-  // 사진 촬영 메소드
   Future<void> _takePicture() async {
     try {
-      await _initializeControllerFuture; // 카메라 초기화 대기
+      await _initializeControllerFuture;
 
-      final XFile picture = await _controller.takePicture(); // 사진 촬영
-      print('사진 촬영 완료: ${picture.path}'); // 촬영된 사진의 경로 출력
+      if (_controller == null || !_controller!.value.isInitialized) {
+        print('카메라 컨트롤러가 초기화되지 않음');
+        return;
+      }
+
+      final XFile picture = await _controller!.takePicture();
+      print('사진 $_pictureCount 촬영 완료: ${picture.path}');
+
+      if (_pictureCount == 0) {
+        _rearImagePath = picture.path;
+        _pictureCount++;
+
+        // 전면 카메라로 전환
+        _initializeControllerFuture = _initializeCamera(useFrontCamera: true);
+
+      } else if (_pictureCount == 1) {
+        _frontImagePath = picture.path;
+
+        // 화면 이동 및 경로 전달
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PhotosUploadScreen(
+              rearImagePath: _rearImagePath!,
+              frontImagePath: _frontImagePath!,
+            ),
+          ),
+        );
+      }
     } catch (e) {
       print('사진 촬영 실패: $e');
     }
@@ -75,25 +126,15 @@ class _CameraScreenState extends State<CameraScreen> {
           children: [
             SizedBox(height: 5),
             Text(
-              "00:00",
-              style: TextStyle(
-                fontSize: 20.0,
-                color: Colors.grey, //글자 색상 설정
-              ),
+              "00:00", // 타이머 또는 시간 추후 구현 가능
+              style: TextStyle(fontSize: 20.0, color: Colors.grey),
             ),
             SizedBox(height: 20),
             Container(
               decoration: BoxDecoration(
-                //container 스타일 매개변수
-                color: Colors.red, //색상 지정
-                border: Border.all(
-                  //테두리 설정
-                  width: 3, //테두리 굵기 설정
-                  color: Colors.black, //테두리 색상 설정
-                ),
-                borderRadius: BorderRadius.circular(
-                  16, //테두리 둥글게 설정
-                ),
+                color: Colors.red,
+                border: Border.all(width: 3, color: Colors.black),
+                borderRadius: BorderRadius.circular(16),
               ),
               height: 492,
               width: 369,
@@ -102,14 +143,12 @@ class _CameraScreenState extends State<CameraScreen> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('카메라 초기화 실패: ${snapshot.error}'));
+                  } else if (snapshot.hasError || _controller == null) {
+                    return Center(child: Text('카메라 초기화 실패'));
                   } else {
-                    // 카메라 프리뷰를 둥글게 처리
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      // Container와 같은 radius
-                      child: CameraPreview(_controller),
+                      child: CameraPreview(_controller!),
                     );
                   }
                 },
@@ -120,45 +159,39 @@ class _CameraScreenState extends State<CameraScreen> {
               height: 95,
               width: 245,
               decoration: BoxDecoration(
-                //container 스타일 매개변수
-                color: secondaryColor, //색상 지정
-                border: Border.all(
-                  //테두리 설정
-                  width: 0, //테두리 굵기 설정
-                  color: secondaryColor, //테두리 색상 설정
-                ),
-                borderRadius: BorderRadius.circular(
-                  32, //테두리 둥글게 설정
-                ),
+                color: secondaryColor,
+                borderRadius: BorderRadius.circular(32),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   IconButton(
-                    onPressed: () {
-                      print("플래시 버튼 눌림!");
-                    },
-                    icon: Icon(Icons.flash_auto),
-                  ),
-                  OutlinedButton(
-                    onPressed:_takePicture,
-                    style: OutlinedButton.styleFrom(
-                      shape: CircleBorder(),
-                      // 동그란 테두리!
-                      side: BorderSide(width: 6, color: Colors.white),
-                      // 테두리 굵기와 색상
-                      fixedSize: Size(80, 80),
-                      // 버튼 크기
-                      padding: EdgeInsets.zero, // 텍스트/아이콘 위치 정중앙으로 맞춤
-                    ),
-                    child: Text(""), // 가운데 아이콘
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      print("전환 버튼 눌림!");
+                    onPressed: () async {
+                      final rearFile = await copyAssetToFile('assets/img/sample2.jpeg', 'rear_temp.jpeg');
+                      final frontFile = await copyAssetToFile('assets/img/sample1.jpeg', 'front_temp.jpeg');
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PhotosUploadScreen(
+                            rearImagePath: rearFile.path,
+                            frontImagePath: frontFile.path,
+                          ),
+                        ),
+                      );
                     },
                     icon: Icon(Icons.cameraswitch),
+                  ),
+                  OutlinedButton(
+                    onPressed: _takePicture,
+                    style: OutlinedButton.styleFrom(
+                      shape: CircleBorder(),
+                      side: BorderSide(width: 6, color: Colors.white),
+                      fixedSize: Size(80, 80),
+                      padding: EdgeInsets.zero,
+                    ),
+                    child: Text(""),
                   ),
                 ],
               ),

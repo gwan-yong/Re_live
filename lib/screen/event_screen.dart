@@ -58,9 +58,10 @@ class _EventScreen extends State<EventScreen> {
             ' startTime: ${schedule.startTime},'
             ' endUsed: ${schedule.endUsed},'
             ' endTime: ${schedule.endTime},'
-            ' repeatType: ${schedule.repeateType},'
+            ' repeatType: ${schedule.repeatType},'
             ' repeatEndUsed: ${schedule.repeatEndUsed},'
-            ' repeatEndDate: ${schedule.repeatEndDate},',
+            ' repeatEndDate: ${schedule.repeatEndDate},'
+            ' completed: ${schedule.completed},',
       );
     }
   }
@@ -162,7 +163,7 @@ class _EventScreen extends State<EventScreen> {
                         startTime: drift.Value(startTime),
                         endUsed: drift.Value(endUsed),
                         endTime: drift.Value(endTime),
-                        repeateType: drift.Value(repeatType),
+                        repeatType: drift.Value(repeatType),
                         repeatEndUsed: drift.Value(repeatEndUsed),
                         repeatEndDate: drift.Value(repeatEndDate),
                       );

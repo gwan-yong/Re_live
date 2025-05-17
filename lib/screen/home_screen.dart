@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:re_live/screen/calendar_screen.dart';
 import 'package:re_live/widget/completed_event_list.dart';
 import 'package:re_live/widget/scheduled_event_list.dart';
-
 import '../database/drift_database.dart';
 import '../widget/fab_menu_button.dart';
 
