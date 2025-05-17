@@ -31,27 +31,12 @@ class LocalDatabase extends _$LocalDatabase {
   Future<int> insertSchedule(ScheduledCompanion schedule) {
     return into(scheduled).insert(schedule);
   }//데이터 입력
-
-  /*Future<List<ScheduledData>> getTodaySchedules() async {
-    final now = DateTime.now();
-    final todayStart = DateTime(now.year, now.month, now.day); // 오늘 00:00:00
-    final tomorrowStart = todayStart.add(Duration(days: 1));   // 내일 00:00:00
-
-    final schedules = await (select(scheduled)
-      ..where((tbl) => tbl.date.isBetweenValues(todayStart, tomorrowStart)))
-        .get();
-
-    // 시간 순으로 정렬
-    schedules.sort((a, b) => a.startTime.compareTo(b.startTime));
-
-    return schedules;
-  } // 오늘 데이터만 출력*/
+  
   Future<List<ScheduledData>> getSchedulesByDate(DateTime selectedDate) async {
     final startOfDay = DateTime(selectedDate.year, selectedDate.month, selectedDate.day); // 선택한 날짜의 00:00:00
-    final endOfDay = startOfDay.add(Duration(days: 1)); // 선택한 날짜의 23:59:59
 
     final schedules = await (select(scheduled)
-      ..where((tbl) => tbl.date.isBetweenValues(startOfDay, endOfDay)))
+      ..where((tbl) => tbl.date.equals(startOfDay)))
         .get();
 
     // 시간 순으로 정렬
@@ -59,6 +44,11 @@ class LocalDatabase extends _$LocalDatabase {
 
     return schedules;
   }
+
+  Future<int> deleteSchedule(int scheduleId) {
+    return (delete(scheduled)..where((tbl) => tbl.id.equals(scheduleId))).go();
+  }
+
 
 
   Future<List<ScheduledData>> getAllSchedules() {
