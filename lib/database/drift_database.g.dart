@@ -138,6 +138,30 @@ class $ScheduledTable extends Scheduled
     ),
     defaultValue: Constant(false),
   );
+  static const VerificationMeta _missedMeta = const VerificationMeta('missed');
+  @override
+  late final GeneratedColumn<bool> missed = GeneratedColumn<bool>(
+    'missed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("missed" IN (0, 1))',
+    ),
+    defaultValue: Constant(false),
+  );
+  static const VerificationMeta _missedCommentMeta = const VerificationMeta(
+    'missedComment',
+  );
+  @override
+  late final GeneratedColumn<String> missedComment = GeneratedColumn<String>(
+    'missed_comment',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -151,6 +175,8 @@ class $ScheduledTable extends Scheduled
     repeatEndUsed,
     repeatEndDate,
     completed,
+    missed,
+    missedComment,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -247,6 +273,21 @@ class $ScheduledTable extends Scheduled
         completed.isAcceptableOrUnknown(data['completed']!, _completedMeta),
       );
     }
+    if (data.containsKey('missed')) {
+      context.handle(
+        _missedMeta,
+        missed.isAcceptableOrUnknown(data['missed']!, _missedMeta),
+      );
+    }
+    if (data.containsKey('missed_comment')) {
+      context.handle(
+        _missedCommentMeta,
+        missedComment.isAcceptableOrUnknown(
+          data['missed_comment']!,
+          _missedCommentMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -310,6 +351,15 @@ class $ScheduledTable extends Scheduled
             DriftSqlType.bool,
             data['${effectivePrefix}completed'],
           )!,
+      missed:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}missed'],
+          )!,
+      missedComment: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}missed_comment'],
+      ),
     );
   }
 
@@ -331,6 +381,8 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
   final bool repeatEndUsed;
   final DateTime repeatEndDate;
   final bool completed;
+  final bool missed;
+  final String? missedComment;
   const ScheduledData({
     required this.id,
     required this.title,
@@ -343,6 +395,8 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     required this.repeatEndUsed,
     required this.repeatEndDate,
     required this.completed,
+    required this.missed,
+    this.missedComment,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -360,6 +414,10 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     map['repeat_end_used'] = Variable<bool>(repeatEndUsed);
     map['repeat_end_date'] = Variable<DateTime>(repeatEndDate);
     map['completed'] = Variable<bool>(completed);
+    map['missed'] = Variable<bool>(missed);
+    if (!nullToAbsent || missedComment != null) {
+      map['missed_comment'] = Variable<String>(missedComment);
+    }
     return map;
   }
 
@@ -377,6 +435,11 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
       repeatEndUsed: Value(repeatEndUsed),
       repeatEndDate: Value(repeatEndDate),
       completed: Value(completed),
+      missed: Value(missed),
+      missedComment:
+          missedComment == null && nullToAbsent
+              ? const Value.absent()
+              : Value(missedComment),
     );
   }
 
@@ -397,6 +460,8 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
       repeatEndUsed: serializer.fromJson<bool>(json['repeatEndUsed']),
       repeatEndDate: serializer.fromJson<DateTime>(json['repeatEndDate']),
       completed: serializer.fromJson<bool>(json['completed']),
+      missed: serializer.fromJson<bool>(json['missed']),
+      missedComment: serializer.fromJson<String?>(json['missedComment']),
     );
   }
   @override
@@ -414,6 +479,8 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
       'repeatEndUsed': serializer.toJson<bool>(repeatEndUsed),
       'repeatEndDate': serializer.toJson<DateTime>(repeatEndDate),
       'completed': serializer.toJson<bool>(completed),
+      'missed': serializer.toJson<bool>(missed),
+      'missedComment': serializer.toJson<String?>(missedComment),
     };
   }
 
@@ -429,6 +496,8 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     bool? repeatEndUsed,
     DateTime? repeatEndDate,
     bool? completed,
+    bool? missed,
+    Value<String?> missedComment = const Value.absent(),
   }) => ScheduledData(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -441,6 +510,9 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     repeatEndUsed: repeatEndUsed ?? this.repeatEndUsed,
     repeatEndDate: repeatEndDate ?? this.repeatEndDate,
     completed: completed ?? this.completed,
+    missed: missed ?? this.missed,
+    missedComment:
+        missedComment.present ? missedComment.value : this.missedComment,
   );
   ScheduledData copyWithCompanion(ScheduledCompanion data) {
     return ScheduledData(
@@ -462,6 +534,11 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
               ? data.repeatEndDate.value
               : this.repeatEndDate,
       completed: data.completed.present ? data.completed.value : this.completed,
+      missed: data.missed.present ? data.missed.value : this.missed,
+      missedComment:
+          data.missedComment.present
+              ? data.missedComment.value
+              : this.missedComment,
     );
   }
 
@@ -478,7 +555,9 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
           ..write('repeatType: $repeatType, ')
           ..write('repeatEndUsed: $repeatEndUsed, ')
           ..write('repeatEndDate: $repeatEndDate, ')
-          ..write('completed: $completed')
+          ..write('completed: $completed, ')
+          ..write('missed: $missed, ')
+          ..write('missedComment: $missedComment')
           ..write(')'))
         .toString();
   }
@@ -496,6 +575,8 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     repeatEndUsed,
     repeatEndDate,
     completed,
+    missed,
+    missedComment,
   );
   @override
   bool operator ==(Object other) =>
@@ -511,7 +592,9 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
           other.repeatType == this.repeatType &&
           other.repeatEndUsed == this.repeatEndUsed &&
           other.repeatEndDate == this.repeatEndDate &&
-          other.completed == this.completed);
+          other.completed == this.completed &&
+          other.missed == this.missed &&
+          other.missedComment == this.missedComment);
 }
 
 class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
@@ -526,6 +609,8 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
   final Value<bool> repeatEndUsed;
   final Value<DateTime> repeatEndDate;
   final Value<bool> completed;
+  final Value<bool> missed;
+  final Value<String?> missedComment;
   const ScheduledCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
@@ -538,6 +623,8 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     this.repeatEndUsed = const Value.absent(),
     this.repeatEndDate = const Value.absent(),
     this.completed = const Value.absent(),
+    this.missed = const Value.absent(),
+    this.missedComment = const Value.absent(),
   });
   ScheduledCompanion.insert({
     this.id = const Value.absent(),
@@ -551,6 +638,8 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     required bool repeatEndUsed,
     required DateTime repeatEndDate,
     this.completed = const Value.absent(),
+    this.missed = const Value.absent(),
+    this.missedComment = const Value.absent(),
   }) : title = Value(title),
        date = Value(date),
        startTime = Value(startTime),
@@ -570,6 +659,8 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     Expression<bool>? repeatEndUsed,
     Expression<DateTime>? repeatEndDate,
     Expression<bool>? completed,
+    Expression<bool>? missed,
+    Expression<String>? missedComment,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -583,6 +674,8 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
       if (repeatEndUsed != null) 'repeat_end_used': repeatEndUsed,
       if (repeatEndDate != null) 'repeat_end_date': repeatEndDate,
       if (completed != null) 'completed': completed,
+      if (missed != null) 'missed': missed,
+      if (missedComment != null) 'missed_comment': missedComment,
     });
   }
 
@@ -598,6 +691,8 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     Value<bool>? repeatEndUsed,
     Value<DateTime>? repeatEndDate,
     Value<bool>? completed,
+    Value<bool>? missed,
+    Value<String?>? missedComment,
   }) {
     return ScheduledCompanion(
       id: id ?? this.id,
@@ -611,6 +706,8 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
       repeatEndUsed: repeatEndUsed ?? this.repeatEndUsed,
       repeatEndDate: repeatEndDate ?? this.repeatEndDate,
       completed: completed ?? this.completed,
+      missed: missed ?? this.missed,
+      missedComment: missedComment ?? this.missedComment,
     );
   }
 
@@ -650,6 +747,12 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     if (completed.present) {
       map['completed'] = Variable<bool>(completed.value);
     }
+    if (missed.present) {
+      map['missed'] = Variable<bool>(missed.value);
+    }
+    if (missedComment.present) {
+      map['missed_comment'] = Variable<String>(missedComment.value);
+    }
     return map;
   }
 
@@ -666,7 +769,9 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
           ..write('repeatType: $repeatType, ')
           ..write('repeatEndUsed: $repeatEndUsed, ')
           ..write('repeatEndDate: $repeatEndDate, ')
-          ..write('completed: $completed')
+          ..write('completed: $completed, ')
+          ..write('missed: $missed, ')
+          ..write('missedComment: $missedComment')
           ..write(')'))
         .toString();
   }
@@ -1076,6 +1181,8 @@ typedef $$ScheduledTableCreateCompanionBuilder =
       required bool repeatEndUsed,
       required DateTime repeatEndDate,
       Value<bool> completed,
+      Value<bool> missed,
+      Value<String?> missedComment,
     });
 typedef $$ScheduledTableUpdateCompanionBuilder =
     ScheduledCompanion Function({
@@ -1090,6 +1197,8 @@ typedef $$ScheduledTableUpdateCompanionBuilder =
       Value<bool> repeatEndUsed,
       Value<DateTime> repeatEndDate,
       Value<bool> completed,
+      Value<bool> missed,
+      Value<String?> missedComment,
     });
 
 class $$ScheduledTableFilterComposer
@@ -1153,6 +1262,16 @@ class $$ScheduledTableFilterComposer
 
   ColumnFilters<bool> get completed => $composableBuilder(
     column: $table.completed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get missed => $composableBuilder(
+    column: $table.missed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get missedComment => $composableBuilder(
+    column: $table.missedComment,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1220,6 +1339,16 @@ class $$ScheduledTableOrderingComposer
     column: $table.completed,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get missed => $composableBuilder(
+    column: $table.missed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get missedComment => $composableBuilder(
+    column: $table.missedComment,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ScheduledTableAnnotationComposer
@@ -1269,6 +1398,14 @@ class $$ScheduledTableAnnotationComposer
 
   GeneratedColumn<bool> get completed =>
       $composableBuilder(column: $table.completed, builder: (column) => column);
+
+  GeneratedColumn<bool> get missed =>
+      $composableBuilder(column: $table.missed, builder: (column) => column);
+
+  GeneratedColumn<String> get missedComment => $composableBuilder(
+    column: $table.missedComment,
+    builder: (column) => column,
+  );
 }
 
 class $$ScheduledTableTableManager
@@ -1313,6 +1450,8 @@ class $$ScheduledTableTableManager
                 Value<bool> repeatEndUsed = const Value.absent(),
                 Value<DateTime> repeatEndDate = const Value.absent(),
                 Value<bool> completed = const Value.absent(),
+                Value<bool> missed = const Value.absent(),
+                Value<String?> missedComment = const Value.absent(),
               }) => ScheduledCompanion(
                 id: id,
                 title: title,
@@ -1325,6 +1464,8 @@ class $$ScheduledTableTableManager
                 repeatEndUsed: repeatEndUsed,
                 repeatEndDate: repeatEndDate,
                 completed: completed,
+                missed: missed,
+                missedComment: missedComment,
               ),
           createCompanionCallback:
               ({
@@ -1339,6 +1480,8 @@ class $$ScheduledTableTableManager
                 required bool repeatEndUsed,
                 required DateTime repeatEndDate,
                 Value<bool> completed = const Value.absent(),
+                Value<bool> missed = const Value.absent(),
+                Value<String?> missedComment = const Value.absent(),
               }) => ScheduledCompanion.insert(
                 id: id,
                 title: title,
@@ -1351,6 +1494,8 @@ class $$ScheduledTableTableManager
                 repeatEndUsed: repeatEndUsed,
                 repeatEndDate: repeatEndDate,
                 completed: completed,
+                missed: missed,
+                missedComment: missedComment,
               ),
           withReferenceMapper:
               (p0) =>

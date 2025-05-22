@@ -5,7 +5,7 @@ import '../widget/completed_event_list.dart';
 import 'home_screen.dart';
 
 class JournalScreen extends StatelessWidget{
-  const JournalScreen({Key? key}) : super(key: key);
+  const JournalScreen({super.key});
 
   Widget build(BuildContext context){
     return Scaffold(

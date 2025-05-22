@@ -3,17 +3,20 @@ import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-
 import '../theme/colors.dart';
-import 'photos_upload_screen.dart'; // 사진 업로드 화면 import
+import 'photos_upload_screen.dart';
 
 class CameraScreen extends StatefulWidget {
+  final bool fromMissedEvent;
+
+  const CameraScreen({Key? key, this.fromMissedEvent = false}) : super(key: key);
+
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-  CameraController? _controller; // late 제거하고 nullable로 변경
+  CameraController? _controller;
   late Future<void> _initializeControllerFuture;
   late List<CameraDescription> _cameras;
 
@@ -34,31 +37,24 @@ class _CameraScreenState extends State<CameraScreen> {
       await _controller!.initialize();
 
       setState(() {
-        _initializeControllerFuture = Future.value(); // 초기화 완료 표시
+        _initializeControllerFuture = Future.value();
       });
     } catch (e) {
       print('카메라 초기화 실패: $e');
       setState(() {
-        _initializeControllerFuture = Future.error(e); // 에러를 Future로 전달
+        _initializeControllerFuture = Future.error(e);
         _controller = null;
       });
     }
   }
 
   Future<File> copyAssetToFile(String assetPath, String filename) async {
-    // 에셋을 메모리에 로드
     final byteData = await rootBundle.load(assetPath);
-
-    // 임시 디렉토리 가져오기
     final tempDir = await getTemporaryDirectory();
     final file = File('${tempDir.path}/$filename');
-
-    // 에셋 데이터를 파일로 복사
     await file.writeAsBytes(byteData.buffer.asUint8List());
-
-    return file; // FileImage로 사용 가능
+    return file;
   }
-
 
   @override
   void initState() {
@@ -69,7 +65,7 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void dispose() {
     try {
-      _controller?.dispose(); // null일 수 있으므로 안전하게
+      _controller?.dispose();
     } catch (e) {
       print('dispose 중 오류 발생: $e');
     }
@@ -98,16 +94,24 @@ class _CameraScreenState extends State<CameraScreen> {
       } else if (_pictureCount == 1) {
         _frontImagePath = picture.path;
 
-        // 화면 이동 및 경로 전달
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PhotosUploadScreen(
-              rearImagePath: _rearImagePath!,
-              frontImagePath: _frontImagePath!,
+        if (widget.fromMissedEvent) {
+          // MissedEventJournal로부터 왔다면 pop으로 결과 전달
+          Navigator.pop(context, {
+            'rearImagePath': _rearImagePath!,
+            'frontImagePath': _frontImagePath!,
+          });
+        } else {
+          // 일반적으로 PhotosUploadScreen으로 이동
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PhotosUploadScreen(
+                rearImagePath: _rearImagePath!,
+                frontImagePath: _frontImagePath!,
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
     } catch (e) {
       print('사진 촬영 실패: $e');
@@ -126,7 +130,7 @@ class _CameraScreenState extends State<CameraScreen> {
           children: [
             SizedBox(height: 5),
             Text(
-              "00:00", // 타이머 또는 시간 추후 구현 가능
+              "00:00", // 추후 타이머 표시 가능
               style: TextStyle(fontSize: 20.0, color: Colors.grey),
             ),
             SizedBox(height: 20),
@@ -171,15 +175,22 @@ class _CameraScreenState extends State<CameraScreen> {
                       final rearFile = await copyAssetToFile('assets/img/sample2.jpeg', 'rear_temp.jpeg');
                       final frontFile = await copyAssetToFile('assets/img/sample1.jpeg', 'front_temp.jpeg');
 
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PhotosUploadScreen(
-                            rearImagePath: rearFile.path,
-                            frontImagePath: frontFile.path,
+                      if (widget.fromMissedEvent) {
+                        Navigator.pop(context, {
+                          'rearImagePath': rearFile.path,
+                          'frontImagePath': frontFile.path,
+                        });
+                      } else {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PhotosUploadScreen(
+                              rearImagePath: rearFile.path,
+                              frontImagePath: frontFile.path,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     },
                     icon: Icon(Icons.cameraswitch),
                   ),

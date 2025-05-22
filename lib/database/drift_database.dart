@@ -34,22 +34,12 @@ class LocalDatabase extends _$LocalDatabase {
     return into(scheduled).insert(schedule);
   }//데이터 입력
 
-  /*Future<List<ScheduledData>> getSchedulesByDate(DateTime selectedDate) async {
-    final startOfDay = DateTime(selectedDate.year, selectedDate.month, selectedDate.day); // 선택한 날짜의 00:00:00
-
-    final schedules = await (select(scheduled)
-      ..where((tbl) => tbl.date.equals(startOfDay)))
-        .get();
-    // 시간 순으로 정렬
-    schedules.sort((a, b) => a.startTime.compareTo(b.startTime));
-    return schedules;
-  }*/
   Future<List<ScheduledData>> getSchedulesByDate(DateTime selectedDate) async {
-    final startOfDay = DateTime(selectedDate.year, selectedDate.month, selectedDate.day); // 00:00:00
+    final selectedDay = DateTime(selectedDate.year, selectedDate.month, selectedDate.day); // 00:00:00
 
     final schedules = await (select(scheduled)
       ..where((tbl) =>
-      tbl.date.equals(startOfDay) & // 날짜 일치
+      tbl.date.equals(selectedDay) & // 날짜 일치
       tbl.completed.equals(false)   // 완료되지 않은 일정만
       ))
         .get();
@@ -69,6 +59,12 @@ class LocalDatabase extends _$LocalDatabase {
   Future<int> markScheduleAsCompleted(int scheduledId) {
     return (update(scheduled)..where((tbl) => tbl.id.equals(scheduledId))).write(
       ScheduledCompanion(completed: Value(true)),
+    );
+  }
+
+  Future<int> markScheduleAsMissed(int scheduledId) {
+    return (update(scheduled)..where((tbl) => tbl.id.equals(scheduledId))).write(
+      ScheduledCompanion(missed: Value(true)),
     );
   }
 
@@ -117,15 +113,10 @@ class LocalDatabase extends _$LocalDatabase {
       final randomPhoto = photoList[random.nextInt(photoList.length)];
       result[date] = randomPhoto.rearImgPath;
     });
-
-    print(result);
-
     return result;
   }
 
 }
-
-
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {

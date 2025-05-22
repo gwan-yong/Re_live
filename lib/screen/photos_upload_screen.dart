@@ -1,10 +1,10 @@
 import 'dart:io';
-
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import '../database/drift_database.dart';
+import '../notification.dart';
 import '../theme/colors.dart';
 import 'home_screen.dart'; // DB 접근을 위한 임포트
 
@@ -131,8 +131,8 @@ class PhotosUploadScreen extends StatelessWidget {
                       takenAt: drift.Value(currentTime),
                     ));
                     if (currentSchedule != null) {
-                      await db.markScheduleAsCompleted(currentSchedule.id);
-                      // 해당 일정의 completed 값을 true로 설정
+                      await db.markScheduleAsCompleted(currentSchedule.id);// 해당 일정의 completed 값을 true로 설정
+                      await notifications.cancel(currentSchedule.id + 10000); // 해당 ID의 놓친 일정 알림 삭제
                       print('일정 완료 처리됨');
                     } else {
                       print('현재 진행 중인 일정이 없습니다.');
@@ -140,7 +140,7 @@ class PhotosUploadScreen extends StatelessWidget {
 
                     _printAllCompletePhotos(db);
 
-                    // ✅ 저장 후 HomeScreen으로 이동
+                    //저장 후 HomeScreen으로 이동
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (context) => HomeScreen()),

@@ -12,4 +12,6 @@ class Scheduled extends Table {
   BoolColumn get repeatEndUsed => boolean()();
   DateTimeColumn get repeatEndDate => dateTime()();
   BoolColumn get completed => boolean().withDefault(Constant(false))();
+  BoolColumn get missed => boolean().withDefault(Constant(false))();
+  TextColumn get missedComment => text().nullable()();
 }
