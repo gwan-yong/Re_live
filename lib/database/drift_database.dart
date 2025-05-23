@@ -9,12 +9,7 @@ import '../model/completed_photos.dart';
 
 part 'drift_database.g.dart';
 
-@DriftDatabase(
-  tables: [
-    Scheduled,
-    CompletedPhotos,
-  ],
-)
+@DriftDatabase(tables: [Scheduled, CompletedPhotos])
 class LocalDatabase extends _$LocalDatabase {
   // 싱글턴 인스턴스를 위한 정적 변수
   static final LocalDatabase _instance = LocalDatabase._internal();
@@ -30,78 +25,177 @@ class LocalDatabase extends _$LocalDatabase {
   @override
   int get schemaVersion => 1;
 
+  //일정 입력
   Future<int> insertSchedule(ScheduledCompanion schedule) {
     return into(scheduled).insert(schedule);
-  }//데이터 입력
-
-  Future<List<ScheduledData>> getSchedulesByDate(DateTime selectedDate) async {
-    final selectedDay = DateTime(selectedDate.year, selectedDate.month, selectedDate.day); // 00:00:00
-
-    final schedules = await (select(scheduled)
-      ..where((tbl) =>
-      tbl.date.equals(selectedDay) & // 날짜 일치
-      tbl.completed.equals(false)   // 완료되지 않은 일정만
-      ))
-        .get();
-
-    schedules.sort((a, b) => a.startTime.compareTo(b.startTime));
-    return schedules;
   }
 
+  //해당 일정 삭제
   Future<int> deleteSchedule(int scheduleId) {
     return (delete(scheduled)..where((tbl) => tbl.id.equals(scheduleId))).go();
   }
 
+  //모든 scheduled 데이터 출력
   Future<List<ScheduledData>> getAllSchedules() {
     return select(scheduled).get();
-  }//모든 scheduled 데이터 출력
-
-  Future<int> markScheduleAsCompleted(int scheduledId) {
-    return (update(scheduled)..where((tbl) => tbl.id.equals(scheduledId))).write(
-      ScheduledCompanion(completed: Value(true)),
-    );
   }
 
-  Future<int> markScheduleAsMissed(int scheduledId) {
-    return (update(scheduled)..where((tbl) => tbl.id.equals(scheduledId))).write(
-      ScheduledCompanion(missed: Value(true)),
+  //해당 날짜에 실행 예정인 일정 출력
+  Future<List<ScheduledData>> getSchedulesByDate(DateTime selectedDate) async {
+    final selectedDay = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
     );
+
+    final allSchedules =
+        await (select(scheduled).join([
+          leftOuterJoin(
+            completedPhotos,
+            completedPhotos.scheduledId.equalsExp(scheduled.id),
+          ),
+        ])..where(
+          completedPhotos.id.isNull() |
+              completedPhotos.takenAt.isNotNull(), // takenAt이 존재할 때
+        )).get();
+
+    final validSchedules =
+        allSchedules
+            .where((row) {
+              final schedule = row.readTable(scheduled);
+              final photo = row.readTableOrNull(completedPhotos);
+
+              // 만약 completedPhotos에 takenAt이 있다면 같은 날짜인지 확인
+              if (photo != null) {
+                final takenAt = photo.takenAt;
+                final takenDay = DateTime(
+                  takenAt.year,
+                  takenAt.month,
+                  takenAt.day,
+                );
+                if (takenDay == selectedDay) {
+                  return false; // 이미 오늘 찍은 사진이 있으므로 제외
+                }
+              }
+
+              final baseDate = DateTime(
+                schedule.date.year,
+                schedule.date.month,
+                schedule.date.day,
+              );
+              final repeatType = schedule.repeatType;
+
+              if (repeatType == '없음') {
+                return baseDate == selectedDay;
+              }
+
+              if (schedule.repeatEndUsed) {
+                final endDate = DateTime(
+                  schedule.repeatEndDate!.year,
+                  schedule.repeatEndDate!.month,
+                  schedule.repeatEndDate!.day,
+                );
+                if (selectedDay.isAfter(endDate)) return false;
+              }
+
+              switch (repeatType) {
+                case '매일':
+                  return !selectedDay.isBefore(baseDate);
+                case '매주':
+                  return !selectedDay.isBefore(baseDate) &&
+                      baseDate.weekday == selectedDay.weekday;
+                case '매월':
+                  return !selectedDay.isBefore(baseDate) &&
+                      baseDate.day == selectedDay.day;
+                case '매년':
+                  return !selectedDay.isBefore(baseDate) &&
+                      baseDate.day == selectedDay.day &&
+                      baseDate.month == selectedDay.month;
+                default:
+                  return false;
+              }
+            })
+            .map((row) => row.readTable(scheduled))
+            .toList();
+
+    validSchedules.sort((a, b) => a.startTime.compareTo(b.startTime));
+    return validSchedules;
   }
 
+  //현재 진행중인 일정 가져오기
+  Future<ScheduledData?> getCurrentRunningSchedule() async {
+    final now = DateTime.now();
+    final nowMinutes = now.hour * 60 + now.minute;
+
+    // 오늘 날짜 기준 일정 가져오기
+    final schedules = await getSchedulesByDate(now);
+
+    for (final schedule in schedules) {
+      final start = schedule.startTime;
+      final endUsed = schedule.endUsed;
+      final end = schedule.endTime;
+
+      // 종료 시간 사용 여부에 따라 조건 분기
+      if (!endUsed) {
+        // 시작 시간부터 30분 이내인지 확인
+        if (start <= nowMinutes && nowMinutes <= start + 30) {
+          return schedule;
+        }
+      } else {
+        // 시작 시간과 종료 시간 사이인지 확인
+        if (start <= nowMinutes && nowMinutes < end) {
+          return schedule;
+        }
+      }
+    }
+
+    return null; // 조건을 만족하는 일정이 없으면 null
+  }
+
+  //완료 일정 등록하기
   Future<int> insertCompletePhoto(CompletedPhotosCompanion photo) {
     return into(completedPhotos).insert(photo);
   }
 
+  //완료된 일정 모두 보여주기
   Future<List<CompletedPhoto>> getAllCompletePhotos() {
     return select(completedPhotos).get();
-  }//모든 completePhotos 데이터 출력
-
-  Future<List<CompletedPhoto>> getTodayPhotos(DateTime date) async {
-    final now = date;
-    final todayStart = DateTime(now.year, now.month, now.day); // 오늘 00:00
-    final tomorrowStart = todayStart.add(Duration(days: 1));   // 내일 00:00
-
-    return await (select(completedPhotos)
-      ..where((tbl) => tbl.takenAt.isBetweenValues(todayStart, tomorrowStart))
-      ..orderBy([
-            (tbl) => OrderingTerm(expression: tbl.takenAt) // 오름차순 정렬
-      ])
-    ).get();
   }
 
+  //해당 날짜에 완료된 일정들 출력하기
+  Future<List<CompletedPhoto>> getTodayPhotos(DateTime date) async {
+    final selectDay = DateTime(date.year, date.month, date.day); // 선택 날짜 00:00
+    final selectDayTomorrow = selectDay.add(
+      Duration(days: 1),
+    ); // 선택 날짜 다음날 00:00
+
+    return await (select(completedPhotos)
+          ..where(
+            (tbl) => tbl.takenAt.isBetweenValues(selectDay, selectDayTomorrow),
+          )
+          ..orderBy([
+            (tbl) => OrderingTerm(expression: tbl.takenAt), // 오름차순 정렬
+          ]))
+        .get();
+  }
+
+  //달력 날짜에 표시할 이미지를 해당 일자에 촬영된 사진 중 랜덤하게 선택하기
   Future<Map<DateTime, String>> getRandomRearImagesByDate() async {
     final allPhotos = await select(completedPhotos).get();
 
-    // 날짜별로 묶기
+    // 날짜별로 묶기 (rearImgPath가 null이 아닌 것만 포함)
     final Map<DateTime, List<CompletedPhoto>> photosByDate = {};
 
     for (final photo in allPhotos) {
-      // takenAt의 날짜(시간 제외)만 추출
-      final dateOnly = DateTime(photo.takenAt.year, photo.takenAt.month, photo.takenAt.day);
+      if (photo.rearImgPath == null) continue; // null이면 건너뜀
 
-      if (!photosByDate.containsKey(dateOnly)) {
-        photosByDate[dateOnly] = [];
-      }
+      final dateOnly = DateTime(
+        photo.takenAt.year,
+        photo.takenAt.month,
+        photo.takenAt.day,
+      );
+
+      photosByDate.putIfAbsent(dateOnly, () => []);
       photosByDate[dateOnly]!.add(photo);
     }
 
@@ -110,12 +204,14 @@ class LocalDatabase extends _$LocalDatabase {
     final random = Random();
 
     photosByDate.forEach((date, photoList) {
-      final randomPhoto = photoList[random.nextInt(photoList.length)];
-      result[date] = randomPhoto.rearImgPath;
+      if (photoList.isNotEmpty) {
+        final randomPhoto = photoList[random.nextInt(photoList.length)];
+        result[date] = randomPhoto.rearImgPath!;
+      }
     });
+
     return result;
   }
-
 }
 
 LazyDatabase _openConnection() {

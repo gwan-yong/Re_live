@@ -42,7 +42,7 @@ class _EventScreen extends State<EventScreen> {
   bool endUsed = false;
   int endTime = 540; // 9:00
 
-  String repeatType = 'none';
+  String repeatType = '없음';
   bool repeatEndUsed = false;
   late DateTime repeatEndDate;
 
@@ -68,10 +68,7 @@ class _EventScreen extends State<EventScreen> {
         ' endTime: ${schedule.endTime},'
         ' repeatType: ${schedule.repeatType},'
         ' repeatEndUsed: ${schedule.repeatEndUsed},'
-        ' repeatEndDate: ${schedule.repeatEndDate},'
-        ' completed: ${schedule.completed},'
-        ' missed : ${schedule.missed},'
-        ' missedComment: ${schedule.missedComment},',
+        ' repeatEndDate: ${schedule.repeatEndDate},',
       );
     }
   }

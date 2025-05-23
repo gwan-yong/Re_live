@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:re_live/screen/event_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -23,13 +22,7 @@ class _MainCalendarState extends State<MainCalendar> {
     '일', '월', '화', '수', '목', '금', '토'
   ]; // 요일 리스트
 
-  /*final Map<DateTime, String> photoEvents = {
-    DateTime.utc(2025, 4, 5): 'assets/img/sample2.jpeg',
-    DateTime.utc(2025, 4, 4): 'assets/img/sample5.jpeg',
-    DateTime.utc(2025, 4, 3): 'assets/img/sample1.jpeg',
-    DateTime.utc(2025, 4, 2): 'assets/img/sample3.jpeg',
-    DateTime.utc(2025, 4, 1): 'assets/img/sample4.jpeg',
-  };*/ // 사진 리스트
+  // 사진 리스트
   Map<DateTime, String> photoEvents = {};
 
   @override
@@ -147,8 +140,6 @@ class _MainCalendarState extends State<MainCalendar> {
                 defaultBuilder: (context, day, _) {
                   final dateOnly = DateTime(day.year, day.month, day.day);
                   final imagePath = photoEvents[dateOnly];
-                  print("dateOnly: ${dateOnly}");
-                  print("imagePath : ${imagePath}" );
 
                   if (imagePath != null) {
                     // 썸네일만 표시 (숫자 없이)

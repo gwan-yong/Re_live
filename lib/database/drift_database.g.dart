@@ -95,7 +95,7 @@ class $ScheduledTable extends Scheduled
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant('none'),
+    defaultValue: const Constant('없음'),
   );
   static const VerificationMeta _repeatEndUsedMeta = const VerificationMeta(
     'repeatEndUsed',
@@ -106,10 +106,11 @@ class $ScheduledTable extends Scheduled
     aliasedName,
     false,
     type: DriftSqlType.bool,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'CHECK ("repeat_end_used" IN (0, 1))',
     ),
+    defaultValue: Constant(false),
   );
   static const VerificationMeta _repeatEndDateMeta = const VerificationMeta(
     'repeatEndDate',
@@ -119,49 +120,10 @@ class $ScheduledTable extends Scheduled
       GeneratedColumn<DateTime>(
         'repeat_end_date',
         aliasedName,
-        false,
+        true,
         type: DriftSqlType.dateTime,
-        requiredDuringInsert: true,
+        requiredDuringInsert: false,
       );
-  static const VerificationMeta _completedMeta = const VerificationMeta(
-    'completed',
-  );
-  @override
-  late final GeneratedColumn<bool> completed = GeneratedColumn<bool>(
-    'completed',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("completed" IN (0, 1))',
-    ),
-    defaultValue: Constant(false),
-  );
-  static const VerificationMeta _missedMeta = const VerificationMeta('missed');
-  @override
-  late final GeneratedColumn<bool> missed = GeneratedColumn<bool>(
-    'missed',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("missed" IN (0, 1))',
-    ),
-    defaultValue: Constant(false),
-  );
-  static const VerificationMeta _missedCommentMeta = const VerificationMeta(
-    'missedComment',
-  );
-  @override
-  late final GeneratedColumn<String> missedComment = GeneratedColumn<String>(
-    'missed_comment',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -174,9 +136,6 @@ class $ScheduledTable extends Scheduled
     repeatType,
     repeatEndUsed,
     repeatEndDate,
-    completed,
-    missed,
-    missedComment,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -253,8 +212,6 @@ class $ScheduledTable extends Scheduled
           _repeatEndUsedMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_repeatEndUsedMeta);
     }
     if (data.containsKey('repeat_end_date')) {
       context.handle(
@@ -262,29 +219,6 @@ class $ScheduledTable extends Scheduled
         repeatEndDate.isAcceptableOrUnknown(
           data['repeat_end_date']!,
           _repeatEndDateMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_repeatEndDateMeta);
-    }
-    if (data.containsKey('completed')) {
-      context.handle(
-        _completedMeta,
-        completed.isAcceptableOrUnknown(data['completed']!, _completedMeta),
-      );
-    }
-    if (data.containsKey('missed')) {
-      context.handle(
-        _missedMeta,
-        missed.isAcceptableOrUnknown(data['missed']!, _missedMeta),
-      );
-    }
-    if (data.containsKey('missed_comment')) {
-      context.handle(
-        _missedCommentMeta,
-        missedComment.isAcceptableOrUnknown(
-          data['missed_comment']!,
-          _missedCommentMeta,
         ),
       );
     }
@@ -341,24 +275,9 @@ class $ScheduledTable extends Scheduled
             DriftSqlType.bool,
             data['${effectivePrefix}repeat_end_used'],
           )!,
-      repeatEndDate:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}repeat_end_date'],
-          )!,
-      completed:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}completed'],
-          )!,
-      missed:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}missed'],
-          )!,
-      missedComment: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}missed_comment'],
+      repeatEndDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}repeat_end_date'],
       ),
     );
   }
@@ -379,10 +298,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
   final int endTime;
   final String repeatType;
   final bool repeatEndUsed;
-  final DateTime repeatEndDate;
-  final bool completed;
-  final bool missed;
-  final String? missedComment;
+  final DateTime? repeatEndDate;
   const ScheduledData({
     required this.id,
     required this.title,
@@ -393,10 +309,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     required this.endTime,
     required this.repeatType,
     required this.repeatEndUsed,
-    required this.repeatEndDate,
-    required this.completed,
-    required this.missed,
-    this.missedComment,
+    this.repeatEndDate,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -412,11 +325,8 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     map['end_time'] = Variable<int>(endTime);
     map['repeat_type'] = Variable<String>(repeatType);
     map['repeat_end_used'] = Variable<bool>(repeatEndUsed);
-    map['repeat_end_date'] = Variable<DateTime>(repeatEndDate);
-    map['completed'] = Variable<bool>(completed);
-    map['missed'] = Variable<bool>(missed);
-    if (!nullToAbsent || missedComment != null) {
-      map['missed_comment'] = Variable<String>(missedComment);
+    if (!nullToAbsent || repeatEndDate != null) {
+      map['repeat_end_date'] = Variable<DateTime>(repeatEndDate);
     }
     return map;
   }
@@ -433,13 +343,10 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
       endTime: Value(endTime),
       repeatType: Value(repeatType),
       repeatEndUsed: Value(repeatEndUsed),
-      repeatEndDate: Value(repeatEndDate),
-      completed: Value(completed),
-      missed: Value(missed),
-      missedComment:
-          missedComment == null && nullToAbsent
+      repeatEndDate:
+          repeatEndDate == null && nullToAbsent
               ? const Value.absent()
-              : Value(missedComment),
+              : Value(repeatEndDate),
     );
   }
 
@@ -458,10 +365,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
       endTime: serializer.fromJson<int>(json['endTime']),
       repeatType: serializer.fromJson<String>(json['repeatType']),
       repeatEndUsed: serializer.fromJson<bool>(json['repeatEndUsed']),
-      repeatEndDate: serializer.fromJson<DateTime>(json['repeatEndDate']),
-      completed: serializer.fromJson<bool>(json['completed']),
-      missed: serializer.fromJson<bool>(json['missed']),
-      missedComment: serializer.fromJson<String?>(json['missedComment']),
+      repeatEndDate: serializer.fromJson<DateTime?>(json['repeatEndDate']),
     );
   }
   @override
@@ -477,10 +381,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
       'endTime': serializer.toJson<int>(endTime),
       'repeatType': serializer.toJson<String>(repeatType),
       'repeatEndUsed': serializer.toJson<bool>(repeatEndUsed),
-      'repeatEndDate': serializer.toJson<DateTime>(repeatEndDate),
-      'completed': serializer.toJson<bool>(completed),
-      'missed': serializer.toJson<bool>(missed),
-      'missedComment': serializer.toJson<String?>(missedComment),
+      'repeatEndDate': serializer.toJson<DateTime?>(repeatEndDate),
     };
   }
 
@@ -494,10 +395,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     int? endTime,
     String? repeatType,
     bool? repeatEndUsed,
-    DateTime? repeatEndDate,
-    bool? completed,
-    bool? missed,
-    Value<String?> missedComment = const Value.absent(),
+    Value<DateTime?> repeatEndDate = const Value.absent(),
   }) => ScheduledData(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -508,11 +406,8 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     endTime: endTime ?? this.endTime,
     repeatType: repeatType ?? this.repeatType,
     repeatEndUsed: repeatEndUsed ?? this.repeatEndUsed,
-    repeatEndDate: repeatEndDate ?? this.repeatEndDate,
-    completed: completed ?? this.completed,
-    missed: missed ?? this.missed,
-    missedComment:
-        missedComment.present ? missedComment.value : this.missedComment,
+    repeatEndDate:
+        repeatEndDate.present ? repeatEndDate.value : this.repeatEndDate,
   );
   ScheduledData copyWithCompanion(ScheduledCompanion data) {
     return ScheduledData(
@@ -533,12 +428,6 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
           data.repeatEndDate.present
               ? data.repeatEndDate.value
               : this.repeatEndDate,
-      completed: data.completed.present ? data.completed.value : this.completed,
-      missed: data.missed.present ? data.missed.value : this.missed,
-      missedComment:
-          data.missedComment.present
-              ? data.missedComment.value
-              : this.missedComment,
     );
   }
 
@@ -554,10 +443,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
           ..write('endTime: $endTime, ')
           ..write('repeatType: $repeatType, ')
           ..write('repeatEndUsed: $repeatEndUsed, ')
-          ..write('repeatEndDate: $repeatEndDate, ')
-          ..write('completed: $completed, ')
-          ..write('missed: $missed, ')
-          ..write('missedComment: $missedComment')
+          ..write('repeatEndDate: $repeatEndDate')
           ..write(')'))
         .toString();
   }
@@ -574,9 +460,6 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     repeatType,
     repeatEndUsed,
     repeatEndDate,
-    completed,
-    missed,
-    missedComment,
   );
   @override
   bool operator ==(Object other) =>
@@ -591,10 +474,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
           other.endTime == this.endTime &&
           other.repeatType == this.repeatType &&
           other.repeatEndUsed == this.repeatEndUsed &&
-          other.repeatEndDate == this.repeatEndDate &&
-          other.completed == this.completed &&
-          other.missed == this.missed &&
-          other.missedComment == this.missedComment);
+          other.repeatEndDate == this.repeatEndDate);
 }
 
 class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
@@ -607,10 +487,7 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
   final Value<int> endTime;
   final Value<String> repeatType;
   final Value<bool> repeatEndUsed;
-  final Value<DateTime> repeatEndDate;
-  final Value<bool> completed;
-  final Value<bool> missed;
-  final Value<String?> missedComment;
+  final Value<DateTime?> repeatEndDate;
   const ScheduledCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
@@ -622,9 +499,6 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     this.repeatType = const Value.absent(),
     this.repeatEndUsed = const Value.absent(),
     this.repeatEndDate = const Value.absent(),
-    this.completed = const Value.absent(),
-    this.missed = const Value.absent(),
-    this.missedComment = const Value.absent(),
   });
   ScheduledCompanion.insert({
     this.id = const Value.absent(),
@@ -635,18 +509,13 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     required bool endUsed,
     required int endTime,
     this.repeatType = const Value.absent(),
-    required bool repeatEndUsed,
-    required DateTime repeatEndDate,
-    this.completed = const Value.absent(),
-    this.missed = const Value.absent(),
-    this.missedComment = const Value.absent(),
+    this.repeatEndUsed = const Value.absent(),
+    this.repeatEndDate = const Value.absent(),
   }) : title = Value(title),
        date = Value(date),
        startTime = Value(startTime),
        endUsed = Value(endUsed),
-       endTime = Value(endTime),
-       repeatEndUsed = Value(repeatEndUsed),
-       repeatEndDate = Value(repeatEndDate);
+       endTime = Value(endTime);
   static Insertable<ScheduledData> custom({
     Expression<int>? id,
     Expression<String>? title,
@@ -658,9 +527,6 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     Expression<String>? repeatType,
     Expression<bool>? repeatEndUsed,
     Expression<DateTime>? repeatEndDate,
-    Expression<bool>? completed,
-    Expression<bool>? missed,
-    Expression<String>? missedComment,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -673,9 +539,6 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
       if (repeatType != null) 'repeat_type': repeatType,
       if (repeatEndUsed != null) 'repeat_end_used': repeatEndUsed,
       if (repeatEndDate != null) 'repeat_end_date': repeatEndDate,
-      if (completed != null) 'completed': completed,
-      if (missed != null) 'missed': missed,
-      if (missedComment != null) 'missed_comment': missedComment,
     });
   }
 
@@ -689,10 +552,7 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     Value<int>? endTime,
     Value<String>? repeatType,
     Value<bool>? repeatEndUsed,
-    Value<DateTime>? repeatEndDate,
-    Value<bool>? completed,
-    Value<bool>? missed,
-    Value<String?>? missedComment,
+    Value<DateTime?>? repeatEndDate,
   }) {
     return ScheduledCompanion(
       id: id ?? this.id,
@@ -705,9 +565,6 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
       repeatType: repeatType ?? this.repeatType,
       repeatEndUsed: repeatEndUsed ?? this.repeatEndUsed,
       repeatEndDate: repeatEndDate ?? this.repeatEndDate,
-      completed: completed ?? this.completed,
-      missed: missed ?? this.missed,
-      missedComment: missedComment ?? this.missedComment,
     );
   }
 
@@ -744,15 +601,6 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     if (repeatEndDate.present) {
       map['repeat_end_date'] = Variable<DateTime>(repeatEndDate.value);
     }
-    if (completed.present) {
-      map['completed'] = Variable<bool>(completed.value);
-    }
-    if (missed.present) {
-      map['missed'] = Variable<bool>(missed.value);
-    }
-    if (missedComment.present) {
-      map['missed_comment'] = Variable<String>(missedComment.value);
-    }
     return map;
   }
 
@@ -768,10 +616,7 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
           ..write('endTime: $endTime, ')
           ..write('repeatType: $repeatType, ')
           ..write('repeatEndUsed: $repeatEndUsed, ')
-          ..write('repeatEndDate: $repeatEndDate, ')
-          ..write('completed: $completed, ')
-          ..write('missed: $missed, ')
-          ..write('missedComment: $missedComment')
+          ..write('repeatEndDate: $repeatEndDate')
           ..write(')'))
         .toString();
   }
@@ -815,9 +660,9 @@ class $CompletedPhotosTable extends CompletedPhotos
   late final GeneratedColumn<String> frontImgPath = GeneratedColumn<String>(
     'front_img_path',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _rearImgPathMeta = const VerificationMeta(
     'rearImgPath',
@@ -826,9 +671,20 @@ class $CompletedPhotosTable extends CompletedPhotos
   late final GeneratedColumn<String> rearImgPath = GeneratedColumn<String>(
     'rear_img_path',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lateCommentMeta = const VerificationMeta(
+    'lateComment',
+  );
+  @override
+  late final GeneratedColumn<String> lateComment = GeneratedColumn<String>(
+    'late_comment',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _takenAtMeta = const VerificationMeta(
     'takenAt',
@@ -841,13 +697,30 @@ class $CompletedPhotosTable extends CompletedPhotos
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _notDisplayMeta = const VerificationMeta(
+    'notDisplay',
+  );
+  @override
+  late final GeneratedColumn<bool> notDisplay = GeneratedColumn<bool>(
+    'not_display',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("not_display" IN (0, 1))',
+    ),
+    defaultValue: Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     scheduledId,
     frontImgPath,
     rearImgPath,
+    lateComment,
     takenAt,
+    notDisplay,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -881,8 +754,6 @@ class $CompletedPhotosTable extends CompletedPhotos
           _frontImgPathMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_frontImgPathMeta);
     }
     if (data.containsKey('rear_img_path')) {
       context.handle(
@@ -892,8 +763,15 @@ class $CompletedPhotosTable extends CompletedPhotos
           _rearImgPathMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_rearImgPathMeta);
+    }
+    if (data.containsKey('late_comment')) {
+      context.handle(
+        _lateCommentMeta,
+        lateComment.isAcceptableOrUnknown(
+          data['late_comment']!,
+          _lateCommentMeta,
+        ),
+      );
     }
     if (data.containsKey('taken_at')) {
       context.handle(
@@ -902,6 +780,12 @@ class $CompletedPhotosTable extends CompletedPhotos
       );
     } else if (isInserting) {
       context.missing(_takenAtMeta);
+    }
+    if (data.containsKey('not_display')) {
+      context.handle(
+        _notDisplayMeta,
+        notDisplay.isAcceptableOrUnknown(data['not_display']!, _notDisplayMeta),
+      );
     }
     return context;
   }
@@ -921,20 +805,27 @@ class $CompletedPhotosTable extends CompletedPhotos
         DriftSqlType.int,
         data['${effectivePrefix}scheduled_id'],
       ),
-      frontImgPath:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}front_img_path'],
-          )!,
-      rearImgPath:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}rear_img_path'],
-          )!,
+      frontImgPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}front_img_path'],
+      ),
+      rearImgPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rear_img_path'],
+      ),
+      lateComment: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}late_comment'],
+      ),
       takenAt:
           attachedDatabase.typeMapping.read(
             DriftSqlType.dateTime,
             data['${effectivePrefix}taken_at'],
+          )!,
+      notDisplay:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}not_display'],
           )!,
     );
   }
@@ -948,15 +839,19 @@ class $CompletedPhotosTable extends CompletedPhotos
 class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
   final int id;
   final int? scheduledId;
-  final String frontImgPath;
-  final String rearImgPath;
+  final String? frontImgPath;
+  final String? rearImgPath;
+  final String? lateComment;
   final DateTime takenAt;
+  final bool notDisplay;
   const CompletedPhoto({
     required this.id,
     this.scheduledId,
-    required this.frontImgPath,
-    required this.rearImgPath,
+    this.frontImgPath,
+    this.rearImgPath,
+    this.lateComment,
     required this.takenAt,
+    required this.notDisplay,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -965,9 +860,17 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
     if (!nullToAbsent || scheduledId != null) {
       map['scheduled_id'] = Variable<int>(scheduledId);
     }
-    map['front_img_path'] = Variable<String>(frontImgPath);
-    map['rear_img_path'] = Variable<String>(rearImgPath);
+    if (!nullToAbsent || frontImgPath != null) {
+      map['front_img_path'] = Variable<String>(frontImgPath);
+    }
+    if (!nullToAbsent || rearImgPath != null) {
+      map['rear_img_path'] = Variable<String>(rearImgPath);
+    }
+    if (!nullToAbsent || lateComment != null) {
+      map['late_comment'] = Variable<String>(lateComment);
+    }
     map['taken_at'] = Variable<DateTime>(takenAt);
+    map['not_display'] = Variable<bool>(notDisplay);
     return map;
   }
 
@@ -978,9 +881,20 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
           scheduledId == null && nullToAbsent
               ? const Value.absent()
               : Value(scheduledId),
-      frontImgPath: Value(frontImgPath),
-      rearImgPath: Value(rearImgPath),
+      frontImgPath:
+          frontImgPath == null && nullToAbsent
+              ? const Value.absent()
+              : Value(frontImgPath),
+      rearImgPath:
+          rearImgPath == null && nullToAbsent
+              ? const Value.absent()
+              : Value(rearImgPath),
+      lateComment:
+          lateComment == null && nullToAbsent
+              ? const Value.absent()
+              : Value(lateComment),
       takenAt: Value(takenAt),
+      notDisplay: Value(notDisplay),
     );
   }
 
@@ -992,9 +906,11 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
     return CompletedPhoto(
       id: serializer.fromJson<int>(json['id']),
       scheduledId: serializer.fromJson<int?>(json['scheduledId']),
-      frontImgPath: serializer.fromJson<String>(json['frontImgPath']),
-      rearImgPath: serializer.fromJson<String>(json['rearImgPath']),
+      frontImgPath: serializer.fromJson<String?>(json['frontImgPath']),
+      rearImgPath: serializer.fromJson<String?>(json['rearImgPath']),
+      lateComment: serializer.fromJson<String?>(json['lateComment']),
       takenAt: serializer.fromJson<DateTime>(json['takenAt']),
+      notDisplay: serializer.fromJson<bool>(json['notDisplay']),
     );
   }
   @override
@@ -1003,24 +919,30 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'scheduledId': serializer.toJson<int?>(scheduledId),
-      'frontImgPath': serializer.toJson<String>(frontImgPath),
-      'rearImgPath': serializer.toJson<String>(rearImgPath),
+      'frontImgPath': serializer.toJson<String?>(frontImgPath),
+      'rearImgPath': serializer.toJson<String?>(rearImgPath),
+      'lateComment': serializer.toJson<String?>(lateComment),
       'takenAt': serializer.toJson<DateTime>(takenAt),
+      'notDisplay': serializer.toJson<bool>(notDisplay),
     };
   }
 
   CompletedPhoto copyWith({
     int? id,
     Value<int?> scheduledId = const Value.absent(),
-    String? frontImgPath,
-    String? rearImgPath,
+    Value<String?> frontImgPath = const Value.absent(),
+    Value<String?> rearImgPath = const Value.absent(),
+    Value<String?> lateComment = const Value.absent(),
     DateTime? takenAt,
+    bool? notDisplay,
   }) => CompletedPhoto(
     id: id ?? this.id,
     scheduledId: scheduledId.present ? scheduledId.value : this.scheduledId,
-    frontImgPath: frontImgPath ?? this.frontImgPath,
-    rearImgPath: rearImgPath ?? this.rearImgPath,
+    frontImgPath: frontImgPath.present ? frontImgPath.value : this.frontImgPath,
+    rearImgPath: rearImgPath.present ? rearImgPath.value : this.rearImgPath,
+    lateComment: lateComment.present ? lateComment.value : this.lateComment,
     takenAt: takenAt ?? this.takenAt,
+    notDisplay: notDisplay ?? this.notDisplay,
   );
   CompletedPhoto copyWithCompanion(CompletedPhotosCompanion data) {
     return CompletedPhoto(
@@ -1033,7 +955,11 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
               : this.frontImgPath,
       rearImgPath:
           data.rearImgPath.present ? data.rearImgPath.value : this.rearImgPath,
+      lateComment:
+          data.lateComment.present ? data.lateComment.value : this.lateComment,
       takenAt: data.takenAt.present ? data.takenAt.value : this.takenAt,
+      notDisplay:
+          data.notDisplay.present ? data.notDisplay.value : this.notDisplay,
     );
   }
 
@@ -1044,14 +970,23 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
           ..write('scheduledId: $scheduledId, ')
           ..write('frontImgPath: $frontImgPath, ')
           ..write('rearImgPath: $rearImgPath, ')
-          ..write('takenAt: $takenAt')
+          ..write('lateComment: $lateComment, ')
+          ..write('takenAt: $takenAt, ')
+          ..write('notDisplay: $notDisplay')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, scheduledId, frontImgPath, rearImgPath, takenAt);
+  int get hashCode => Object.hash(
+    id,
+    scheduledId,
+    frontImgPath,
+    rearImgPath,
+    lateComment,
+    takenAt,
+    notDisplay,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1060,60 +995,74 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
           other.scheduledId == this.scheduledId &&
           other.frontImgPath == this.frontImgPath &&
           other.rearImgPath == this.rearImgPath &&
-          other.takenAt == this.takenAt);
+          other.lateComment == this.lateComment &&
+          other.takenAt == this.takenAt &&
+          other.notDisplay == this.notDisplay);
 }
 
 class CompletedPhotosCompanion extends UpdateCompanion<CompletedPhoto> {
   final Value<int> id;
   final Value<int?> scheduledId;
-  final Value<String> frontImgPath;
-  final Value<String> rearImgPath;
+  final Value<String?> frontImgPath;
+  final Value<String?> rearImgPath;
+  final Value<String?> lateComment;
   final Value<DateTime> takenAt;
+  final Value<bool> notDisplay;
   const CompletedPhotosCompanion({
     this.id = const Value.absent(),
     this.scheduledId = const Value.absent(),
     this.frontImgPath = const Value.absent(),
     this.rearImgPath = const Value.absent(),
+    this.lateComment = const Value.absent(),
     this.takenAt = const Value.absent(),
+    this.notDisplay = const Value.absent(),
   });
   CompletedPhotosCompanion.insert({
     this.id = const Value.absent(),
     this.scheduledId = const Value.absent(),
-    required String frontImgPath,
-    required String rearImgPath,
+    this.frontImgPath = const Value.absent(),
+    this.rearImgPath = const Value.absent(),
+    this.lateComment = const Value.absent(),
     required DateTime takenAt,
-  }) : frontImgPath = Value(frontImgPath),
-       rearImgPath = Value(rearImgPath),
-       takenAt = Value(takenAt);
+    this.notDisplay = const Value.absent(),
+  }) : takenAt = Value(takenAt);
   static Insertable<CompletedPhoto> custom({
     Expression<int>? id,
     Expression<int>? scheduledId,
     Expression<String>? frontImgPath,
     Expression<String>? rearImgPath,
+    Expression<String>? lateComment,
     Expression<DateTime>? takenAt,
+    Expression<bool>? notDisplay,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (scheduledId != null) 'scheduled_id': scheduledId,
       if (frontImgPath != null) 'front_img_path': frontImgPath,
       if (rearImgPath != null) 'rear_img_path': rearImgPath,
+      if (lateComment != null) 'late_comment': lateComment,
       if (takenAt != null) 'taken_at': takenAt,
+      if (notDisplay != null) 'not_display': notDisplay,
     });
   }
 
   CompletedPhotosCompanion copyWith({
     Value<int>? id,
     Value<int?>? scheduledId,
-    Value<String>? frontImgPath,
-    Value<String>? rearImgPath,
+    Value<String?>? frontImgPath,
+    Value<String?>? rearImgPath,
+    Value<String?>? lateComment,
     Value<DateTime>? takenAt,
+    Value<bool>? notDisplay,
   }) {
     return CompletedPhotosCompanion(
       id: id ?? this.id,
       scheduledId: scheduledId ?? this.scheduledId,
       frontImgPath: frontImgPath ?? this.frontImgPath,
       rearImgPath: rearImgPath ?? this.rearImgPath,
+      lateComment: lateComment ?? this.lateComment,
       takenAt: takenAt ?? this.takenAt,
+      notDisplay: notDisplay ?? this.notDisplay,
     );
   }
 
@@ -1132,8 +1081,14 @@ class CompletedPhotosCompanion extends UpdateCompanion<CompletedPhoto> {
     if (rearImgPath.present) {
       map['rear_img_path'] = Variable<String>(rearImgPath.value);
     }
+    if (lateComment.present) {
+      map['late_comment'] = Variable<String>(lateComment.value);
+    }
     if (takenAt.present) {
       map['taken_at'] = Variable<DateTime>(takenAt.value);
+    }
+    if (notDisplay.present) {
+      map['not_display'] = Variable<bool>(notDisplay.value);
     }
     return map;
   }
@@ -1145,7 +1100,9 @@ class CompletedPhotosCompanion extends UpdateCompanion<CompletedPhoto> {
           ..write('scheduledId: $scheduledId, ')
           ..write('frontImgPath: $frontImgPath, ')
           ..write('rearImgPath: $rearImgPath, ')
-          ..write('takenAt: $takenAt')
+          ..write('lateComment: $lateComment, ')
+          ..write('takenAt: $takenAt, ')
+          ..write('notDisplay: $notDisplay')
           ..write(')'))
         .toString();
   }
@@ -1178,11 +1135,8 @@ typedef $$ScheduledTableCreateCompanionBuilder =
       required bool endUsed,
       required int endTime,
       Value<String> repeatType,
-      required bool repeatEndUsed,
-      required DateTime repeatEndDate,
-      Value<bool> completed,
-      Value<bool> missed,
-      Value<String?> missedComment,
+      Value<bool> repeatEndUsed,
+      Value<DateTime?> repeatEndDate,
     });
 typedef $$ScheduledTableUpdateCompanionBuilder =
     ScheduledCompanion Function({
@@ -1195,10 +1149,7 @@ typedef $$ScheduledTableUpdateCompanionBuilder =
       Value<int> endTime,
       Value<String> repeatType,
       Value<bool> repeatEndUsed,
-      Value<DateTime> repeatEndDate,
-      Value<bool> completed,
-      Value<bool> missed,
-      Value<String?> missedComment,
+      Value<DateTime?> repeatEndDate,
     });
 
 class $$ScheduledTableFilterComposer
@@ -1257,21 +1208,6 @@ class $$ScheduledTableFilterComposer
 
   ColumnFilters<DateTime> get repeatEndDate => $composableBuilder(
     column: $table.repeatEndDate,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get completed => $composableBuilder(
-    column: $table.completed,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get missed => $composableBuilder(
-    column: $table.missed,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get missedComment => $composableBuilder(
-    column: $table.missedComment,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1334,21 +1270,6 @@ class $$ScheduledTableOrderingComposer
     column: $table.repeatEndDate,
     builder: (column) => ColumnOrderings(column),
   );
-
-  ColumnOrderings<bool> get completed => $composableBuilder(
-    column: $table.completed,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get missed => $composableBuilder(
-    column: $table.missed,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get missedComment => $composableBuilder(
-    column: $table.missedComment,
-    builder: (column) => ColumnOrderings(column),
-  );
 }
 
 class $$ScheduledTableAnnotationComposer
@@ -1395,17 +1316,6 @@ class $$ScheduledTableAnnotationComposer
     column: $table.repeatEndDate,
     builder: (column) => column,
   );
-
-  GeneratedColumn<bool> get completed =>
-      $composableBuilder(column: $table.completed, builder: (column) => column);
-
-  GeneratedColumn<bool> get missed =>
-      $composableBuilder(column: $table.missed, builder: (column) => column);
-
-  GeneratedColumn<String> get missedComment => $composableBuilder(
-    column: $table.missedComment,
-    builder: (column) => column,
-  );
 }
 
 class $$ScheduledTableTableManager
@@ -1448,10 +1358,7 @@ class $$ScheduledTableTableManager
                 Value<int> endTime = const Value.absent(),
                 Value<String> repeatType = const Value.absent(),
                 Value<bool> repeatEndUsed = const Value.absent(),
-                Value<DateTime> repeatEndDate = const Value.absent(),
-                Value<bool> completed = const Value.absent(),
-                Value<bool> missed = const Value.absent(),
-                Value<String?> missedComment = const Value.absent(),
+                Value<DateTime?> repeatEndDate = const Value.absent(),
               }) => ScheduledCompanion(
                 id: id,
                 title: title,
@@ -1463,9 +1370,6 @@ class $$ScheduledTableTableManager
                 repeatType: repeatType,
                 repeatEndUsed: repeatEndUsed,
                 repeatEndDate: repeatEndDate,
-                completed: completed,
-                missed: missed,
-                missedComment: missedComment,
               ),
           createCompanionCallback:
               ({
@@ -1477,11 +1381,8 @@ class $$ScheduledTableTableManager
                 required bool endUsed,
                 required int endTime,
                 Value<String> repeatType = const Value.absent(),
-                required bool repeatEndUsed,
-                required DateTime repeatEndDate,
-                Value<bool> completed = const Value.absent(),
-                Value<bool> missed = const Value.absent(),
-                Value<String?> missedComment = const Value.absent(),
+                Value<bool> repeatEndUsed = const Value.absent(),
+                Value<DateTime?> repeatEndDate = const Value.absent(),
               }) => ScheduledCompanion.insert(
                 id: id,
                 title: title,
@@ -1493,9 +1394,6 @@ class $$ScheduledTableTableManager
                 repeatType: repeatType,
                 repeatEndUsed: repeatEndUsed,
                 repeatEndDate: repeatEndDate,
-                completed: completed,
-                missed: missed,
-                missedComment: missedComment,
               ),
           withReferenceMapper:
               (p0) =>
@@ -1533,17 +1431,21 @@ typedef $$CompletedPhotosTableCreateCompanionBuilder =
     CompletedPhotosCompanion Function({
       Value<int> id,
       Value<int?> scheduledId,
-      required String frontImgPath,
-      required String rearImgPath,
+      Value<String?> frontImgPath,
+      Value<String?> rearImgPath,
+      Value<String?> lateComment,
       required DateTime takenAt,
+      Value<bool> notDisplay,
     });
 typedef $$CompletedPhotosTableUpdateCompanionBuilder =
     CompletedPhotosCompanion Function({
       Value<int> id,
       Value<int?> scheduledId,
-      Value<String> frontImgPath,
-      Value<String> rearImgPath,
+      Value<String?> frontImgPath,
+      Value<String?> rearImgPath,
+      Value<String?> lateComment,
       Value<DateTime> takenAt,
+      Value<bool> notDisplay,
     });
 
 class $$CompletedPhotosTableFilterComposer
@@ -1575,8 +1477,18 @@ class $$CompletedPhotosTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get lateComment => $composableBuilder(
+    column: $table.lateComment,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get takenAt => $composableBuilder(
     column: $table.takenAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get notDisplay => $composableBuilder(
+    column: $table.notDisplay,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1610,8 +1522,18 @@ class $$CompletedPhotosTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get lateComment => $composableBuilder(
+    column: $table.lateComment,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get takenAt => $composableBuilder(
     column: $table.takenAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get notDisplay => $composableBuilder(
+    column: $table.notDisplay,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -1643,8 +1565,18 @@ class $$CompletedPhotosTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get lateComment => $composableBuilder(
+    column: $table.lateComment,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get takenAt =>
       $composableBuilder(column: $table.takenAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get notDisplay => $composableBuilder(
+    column: $table.notDisplay,
+    builder: (column) => column,
+  );
 }
 
 class $$CompletedPhotosTableTableManager
@@ -1693,29 +1625,37 @@ class $$CompletedPhotosTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<int?> scheduledId = const Value.absent(),
-                Value<String> frontImgPath = const Value.absent(),
-                Value<String> rearImgPath = const Value.absent(),
+                Value<String?> frontImgPath = const Value.absent(),
+                Value<String?> rearImgPath = const Value.absent(),
+                Value<String?> lateComment = const Value.absent(),
                 Value<DateTime> takenAt = const Value.absent(),
+                Value<bool> notDisplay = const Value.absent(),
               }) => CompletedPhotosCompanion(
                 id: id,
                 scheduledId: scheduledId,
                 frontImgPath: frontImgPath,
                 rearImgPath: rearImgPath,
+                lateComment: lateComment,
                 takenAt: takenAt,
+                notDisplay: notDisplay,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 Value<int?> scheduledId = const Value.absent(),
-                required String frontImgPath,
-                required String rearImgPath,
+                Value<String?> frontImgPath = const Value.absent(),
+                Value<String?> rearImgPath = const Value.absent(),
+                Value<String?> lateComment = const Value.absent(),
                 required DateTime takenAt,
+                Value<bool> notDisplay = const Value.absent(),
               }) => CompletedPhotosCompanion.insert(
                 id: id,
                 scheduledId: scheduledId,
                 frontImgPath: frontImgPath,
                 rearImgPath: rearImgPath,
+                lateComment: lateComment,
                 takenAt: takenAt,
+                notDisplay: notDisplay,
               ),
           withReferenceMapper:
               (p0) =>

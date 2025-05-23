@@ -172,7 +172,7 @@ class _CameraScreenState extends State<CameraScreen> {
                 children: [
                   IconButton(
                     onPressed: () async {
-                      final rearFile = await copyAssetToFile('assets/img/sample2.jpeg', 'rear_temp.jpeg');
+                      final rearFile = await copyAssetToFile('assets/img/sample4.jpeg', 'rear_temp.jpeg');
                       final frontFile = await copyAssetToFile('assets/img/sample1.jpeg', 'front_temp.jpeg');
 
                       if (widget.fromMissedEvent) {

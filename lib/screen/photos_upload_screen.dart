@@ -50,10 +50,10 @@ class PhotosUploadScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final database = LocalDatabase(); // 이 줄이 핵심! 내부에서 DB 생성
+    final db = LocalDatabase(); // 이 줄이 핵심! 내부에서 DB 생성
 
     return FutureBuilder<ScheduledData?>(
-      future: _getCurrentRunningSchedule(database),
+      future: db.getCurrentRunningSchedule(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -121,7 +121,7 @@ class PhotosUploadScreen extends StatelessWidget {
                     final currentTime = DateTime.now();
 
                     // _getCurrentRunningSchedule에서 scheduledId 가져오기
-                    final currentSchedule = await _getCurrentRunningSchedule(db);
+                    final currentSchedule = await db.getCurrentRunningSchedule();
 
                     // CompletePhotos 테이블에 데이터 추가
                     await db.insertCompletePhoto(CompletedPhotosCompanion(
@@ -131,7 +131,6 @@ class PhotosUploadScreen extends StatelessWidget {
                       takenAt: drift.Value(currentTime),
                     ));
                     if (currentSchedule != null) {
-                      await db.markScheduleAsCompleted(currentSchedule.id);// 해당 일정의 completed 값을 true로 설정
                       await notifications.cancel(currentSchedule.id + 10000); // 해당 ID의 놓친 일정 알림 삭제
                       print('일정 완료 처리됨');
                     } else {
@@ -163,37 +162,6 @@ class PhotosUploadScreen extends StatelessWidget {
         );
       },
     );
-  }
-
-  // 현재 시간에 실행 중인 일정 1개 가져오기
-  Future<ScheduledData?> _getCurrentRunningSchedule(LocalDatabase db) async {
-    final now = DateTime.now();
-    final nowMinutes = now.hour * 60 + now.minute;
-    final today = DateTime(now.year, now.month, now.day);
-
-    return await (db.select(db.scheduled)
-      ..where((tbl) =>
-      // 날짜가 오늘이고
-      tbl.date.equals(today) &
-
-      // 완료되지 않았고
-      tbl.completed.equals(false) &
-
-      // 조건 1 또는 조건 2 중 하나에 해당
-      (
-          // 조건 1: endUsed == false && startTime <= now < startTime + 30
-          ((tbl.endUsed.equals(false)) &
-          tbl.startTime.isSmallerOrEqualValue(nowMinutes) &
-          tbl.startTime.isBiggerOrEqualValue(nowMinutes - 30))
-          |
-          // 조건 2: endUsed == true && startTime <= now < endTime
-          ((tbl.endUsed.equals(true)) &
-          tbl.startTime.isSmallerOrEqualValue(nowMinutes) &
-          tbl.endTime.isBiggerThanValue(nowMinutes))
-      )
-      )
-      ..limit(1))
-        .getSingleOrNull();
   }
 
   // "오전 6:00" 같은 형식으로 시간 포맷

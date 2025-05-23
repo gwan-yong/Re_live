@@ -52,8 +52,9 @@ class CompletedEventList extends StatelessWidget {
             children: [
               const SizedBox(width: 5),
               ...photos
+                  .where((photo) => photo.rearImgPath != null || photo.frontImgPath != null)
                   .map((photo) =>
-                  _ImageTile(photo.rearImgPath, photo.frontImgPath))
+                  _ImageTile(photo.rearImgPath!, photo.frontImgPath!))
                   .toList(),
               const SizedBox(width: 5),
             ],

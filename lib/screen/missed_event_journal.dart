@@ -187,10 +187,6 @@ class _MissedEventJournalState extends State<MissedEventJournal> {
                     takenAt: drift.Value(currentTime),
                   ),
                 );
-
-                await db.markScheduleAsCompleted(
-                  widget.scheduledId,
-                ); // 해당 일정의 completed 값을 true로 설정
                 await notifications.cancel(
                   widget.scheduledId + 10000,
                 ); // 해당 ID의 놓친 일정 알림 삭제
