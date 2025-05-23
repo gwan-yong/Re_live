@@ -8,7 +8,7 @@ class Scheduled extends Table {
   IntColumn get  startTime => integer()();
   BoolColumn get endUsed => boolean()();
   IntColumn get endTime => integer()();
-  TextColumn get repeateType => text().withDefault(const Constant('none'))();
-  BoolColumn get repeatEndUsed => boolean()();
-  DateTimeColumn get repeatEndDate => dateTime()();
+  TextColumn get repeatType => text().withDefault(const Constant('없음'))();
+  BoolColumn get repeatEndUsed => boolean().withDefault(Constant(false))();
+  DateTimeColumn get repeatEndDate => dateTime().nullable()();
 }

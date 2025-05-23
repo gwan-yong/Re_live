@@ -129,6 +129,7 @@ class EventTitle extends StatelessWidget {
                 onChanged: (value) {
                   onTitleChanged(value); // 🔸 제목 입력이 바뀔 때마다 상위에 전달
                 },
+                onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
                 decoration: InputDecoration(
                   hintText: '제목',
                   hintStyle: TextStyle(

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:re_live/notification.dart';
 import 'package:re_live/screen/calendar_screen.dart';
 import 'package:re_live/widget/completed_event_list.dart';
 import 'package:re_live/widget/scheduled_event_list.dart';
-
 import '../database/drift_database.dart';
 import '../widget/fab_menu_button.dart';
 
@@ -14,7 +14,6 @@ class HomeScreen extends StatelessWidget{
   Widget build(BuildContext context){
     return Scaffold(
       backgroundColor: Colors.white,
-
       body: Stack(
         children: [
           SafeArea(

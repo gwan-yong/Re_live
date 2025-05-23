@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:re_live/screen/event_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../database/drift_database.dart';
 import '../theme/colors.dart';
 
 class MainCalendar extends StatefulWidget {
@@ -20,13 +22,23 @@ class _MainCalendarState extends State<MainCalendar> {
     '일', '월', '화', '수', '목', '금', '토'
   ]; // 요일 리스트
 
-  final Map<DateTime, String> photoEvents = {
-    DateTime.utc(2025, 4, 5): 'assets/img/sample2.jpeg',
-    DateTime.utc(2025, 4, 4): 'assets/img/sample5.jpeg',
-    DateTime.utc(2025, 4, 3): 'assets/img/sample1.jpeg',
-    DateTime.utc(2025, 4, 2): 'assets/img/sample3.jpeg',
-    DateTime.utc(2025, 4, 1): 'assets/img/sample4.jpeg',
-  }; // 사진 리스트
+  // 사진 리스트
+  Map<DateTime, String> photoEvents = {};
+
+  @override
+  void initState() {
+    super.initState();
+    loadPhotoEvents();
+  }
+
+  Future<void> loadPhotoEvents() async {
+    final db = LocalDatabase();
+    final events = await db.getRandomRearImagesByDate();
+
+    setState(() {
+      photoEvents = events;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +138,8 @@ class _MainCalendarState extends State<MainCalendar> {
               },
               calendarBuilders: CalendarBuilders(
                 defaultBuilder: (context, day, _) {
-                  final imagePath = photoEvents[day];
+                  final dateOnly = DateTime(day.year, day.month, day.day);
+                  final imagePath = photoEvents[dateOnly];
 
                   if (imagePath != null) {
                     // 썸네일만 표시 (숫자 없이)
@@ -138,12 +151,12 @@ class _MainCalendarState extends State<MainCalendar> {
                             color: Colors.black, // 테두리 색상
                             width: 2, // 테두리 두께
                           ),
-                          borderRadius: BorderRadius.circular(16), // 테두리 둥글게 만들기
+                          borderRadius: BorderRadius.circular(8), // 테두리 둥글게 만들기
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(14),
-                          child: Image.asset(
-                            imagePath,
+                          child: Image.file(
+                            File(imagePath),
                             fit: BoxFit.cover,
                           ),
                         ),
