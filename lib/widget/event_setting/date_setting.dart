@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:re_live/controller/select_schedule_controller.dart';
 import 'package:re_live/widget/event_setting/date_picker_box.dart';
 import '../../theme/colors.dart';
 
 class DateSetting extends StatefulWidget {
-  final Function(DateTime?, TimeOfDay?) onStartChanged; // 시작 시간 변경 시 호출
-  final Function(TimeOfDay?) onEndChanged;              // 종료 시간 변경 시 호출
-  final Function(bool) onEndUsedChanged;                // 종료 시간 사용 여부 변경 시 호출
   final DateTime? initialDate;
 
   const DateSetting({
     super.key,
-    required this.onStartChanged,
-    required this.onEndChanged,
-    required this.onEndUsedChanged,
     this.initialDate,
   });
 
@@ -25,6 +21,17 @@ class _DateSettingState extends State<DateSetting> {
   DateTime? startDate;
   TimeOfDay? startTime;
   TimeOfDay? endTime;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 컨트롤러의 기존 값을 불러옴
+    startDate = SelectScheduleController.to.selectDate.value;
+    startTime = SelectScheduleController.to.startTime.value;
+    endDayUsed = SelectScheduleController.to.endUsed.value;
+    endTime = SelectScheduleController.to.endTime?.value;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,13 +57,20 @@ class _DateSettingState extends State<DateSetting> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 5),
               child: DatePickerBox(
-                initialDate: widget.initialDate,
+                initialDate: startDate,
+                initialTime: startTime,
                 onDateTimeChanged: (date, time) {
                   setState(() {
                     startDate = date;
                     startTime = time;
                   });
-                  widget.onStartChanged(startDate, startTime);
+
+                  if (date != null) {
+                    SelectScheduleController.to.selectDate.value = date;
+                  }
+                  if (time != null) {
+                    SelectScheduleController.to.startTime.value = time;
+                  }
                 },
               ),
             ),
@@ -80,7 +94,15 @@ class _DateSettingState extends State<DateSetting> {
                   setState(() {
                     endDayUsed = !endDayUsed;
                   });
-                  widget.onEndUsedChanged(endDayUsed);
+
+                  // 컨트롤러 종료 사용 여부 반영
+                  SelectScheduleController.to.endUsed.value = endDayUsed;
+
+                  // 사용 안 할 경우 값 제거
+                  if (!endDayUsed) {
+                    SelectScheduleController.to.endTime.value = null;
+                    endTime = null;
+                  }
                 },
                 child: Container(
                   width: 70,
@@ -103,11 +125,21 @@ class _DateSettingState extends State<DateSetting> {
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 child: DatePickerBox(
                   withDate: false,
+                  initialTime: endTime, // ✅ 종료 시간 초기값 전달
                   onDateTimeChanged: (date, time) {
                     setState(() {
                       endTime = time;
                     });
-                    widget.onEndChanged(endTime);
+
+                    if (time != null) {
+                      if (SelectScheduleController.to.endTime == null) {
+                        SelectScheduleController.to.endTime.value = time;
+                      } else {
+                        SelectScheduleController.to.endTime!.value = time;
+                      }
+                    } else {
+                      SelectScheduleController.to.endTime.value = null;
+                    }
                   },
                 ),
               ),

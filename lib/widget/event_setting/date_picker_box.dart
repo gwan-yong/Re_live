@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 class DatePickerBox extends StatefulWidget {
-  final bool withDate; // 날짜 선택 여부
-  final bool withTime; // 시간 선택 여부
-  final Function(DateTime?, TimeOfDay?)? onDateTimeChanged; // 선택 결과 전달
+  final bool withDate;
+  final bool withTime;
+  final Function(DateTime?, TimeOfDay?)? onDateTimeChanged;
   final DateTime? initialDate;
+  final TimeOfDay? initialTime;
 
   const DatePickerBox({
     super.key,
@@ -12,6 +13,7 @@ class DatePickerBox extends StatefulWidget {
     this.withTime = true,
     this.onDateTimeChanged,
     this.initialDate,
+    this.initialTime,
   });
 
   @override
@@ -25,24 +27,21 @@ class _DatePickerBoxState extends State<DatePickerBox> {
   @override
   void initState() {
     super.initState();
-    // 초기 값 설정: 현재 날짜와 시간
-    //DateTime now = DateTime.now();
     selectedDate = widget.initialDate;
-    selectedTime;
-    //= TimeOfDay(hour: now.hour, minute: now.minute);  // 현재 시간 설정
+    selectedTime = widget.initialTime;
   }
 
   void _pickDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate ?? DateTime.now(),  // selectedDate가 null인 경우 현재 날짜로 초기화
+      initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
 
     if (picked != null) {
       setState(() {
-        selectedDate = DateTime(picked.year, picked.month, picked.day);  // 선택된 날짜만 반영
+        selectedDate = DateTime(picked.year, picked.month, picked.day);
       });
 
       widget.onDateTimeChanged?.call(selectedDate, selectedTime);
@@ -52,7 +51,7 @@ class _DatePickerBoxState extends State<DatePickerBox> {
   void _pickTime() async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: selectedTime ?? TimeOfDay.now(),  // selectedTime이 null인 경우 현재 시간으로 초기화
+      initialTime: selectedTime ?? TimeOfDay.now(),
     );
 
     if (picked != null) {
@@ -83,11 +82,9 @@ class _DatePickerBoxState extends State<DatePickerBox> {
                   ),
                   child: Center(
                     child: Text(
-                      // 날짜가 null이 아니면 날짜를 포맷해서 출력
-                      //'${selectedDate?.year.toString() ?? '선택 안됨'}.${selectedDate?.month.toString().padLeft(2, '0') ?? ''}.${selectedDate?.day.toString().padLeft(2, '0') ?? ''}',
                       selectedDate != null
-                          ? '${selectedDate?.year.toString() ?? '선택 안됨'}.${selectedDate?.month.toString().padLeft(2, '0') ?? ''}.${selectedDate?.day.toString().padLeft(2, '0') ?? ''}'
-                          : '날짜 선택',  // 날짜 선택이 안된 경우 '날짜 선택'을 표시
+                          ? '${selectedDate!.year}.${selectedDate!.month.toString().padLeft(2, '0')}.${selectedDate!.day.toString().padLeft(2, '0')}'
+                          : '날짜 선택',
                       style: const TextStyle(fontSize: 18.0, color: Colors.black87),
                     ),
                   ),
@@ -110,7 +107,7 @@ class _DatePickerBoxState extends State<DatePickerBox> {
                 child: Text(
                   selectedTime != null
                       ? selectedTime!.format(context)
-                      : '시간 선택',  // 시간 선택이 안된 경우 '시간 선택'을 표시
+                      : '시간 선택',
                   style: const TextStyle(fontSize: 18.0, color: Colors.black87),
                 ),
               ),

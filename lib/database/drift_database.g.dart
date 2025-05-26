@@ -81,9 +81,9 @@ class $ScheduledTable extends Scheduled
   late final GeneratedColumn<int> endTime = GeneratedColumn<int>(
     'end_time',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _repeatTypeMeta = const VerificationMeta(
     'repeatType',
@@ -195,8 +195,6 @@ class $ScheduledTable extends Scheduled
         _endTimeMeta,
         endTime.isAcceptableOrUnknown(data['end_time']!, _endTimeMeta),
       );
-    } else if (isInserting) {
-      context.missing(_endTimeMeta);
     }
     if (data.containsKey('repeat_type')) {
       context.handle(
@@ -260,11 +258,10 @@ class $ScheduledTable extends Scheduled
             DriftSqlType.bool,
             data['${effectivePrefix}end_used'],
           )!,
-      endTime:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}end_time'],
-          )!,
+      endTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}end_time'],
+      ),
       repeatType:
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
@@ -295,7 +292,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
   final DateTime date;
   final int startTime;
   final bool endUsed;
-  final int endTime;
+  final int? endTime;
   final String repeatType;
   final bool repeatEndUsed;
   final DateTime? repeatEndDate;
@@ -306,7 +303,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     required this.date,
     required this.startTime,
     required this.endUsed,
-    required this.endTime,
+    this.endTime,
     required this.repeatType,
     required this.repeatEndUsed,
     this.repeatEndDate,
@@ -322,7 +319,9 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     map['date'] = Variable<DateTime>(date);
     map['start_time'] = Variable<int>(startTime);
     map['end_used'] = Variable<bool>(endUsed);
-    map['end_time'] = Variable<int>(endTime);
+    if (!nullToAbsent || endTime != null) {
+      map['end_time'] = Variable<int>(endTime);
+    }
     map['repeat_type'] = Variable<String>(repeatType);
     map['repeat_end_used'] = Variable<bool>(repeatEndUsed);
     if (!nullToAbsent || repeatEndDate != null) {
@@ -340,7 +339,10 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
       date: Value(date),
       startTime: Value(startTime),
       endUsed: Value(endUsed),
-      endTime: Value(endTime),
+      endTime:
+          endTime == null && nullToAbsent
+              ? const Value.absent()
+              : Value(endTime),
       repeatType: Value(repeatType),
       repeatEndUsed: Value(repeatEndUsed),
       repeatEndDate:
@@ -362,7 +364,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
       date: serializer.fromJson<DateTime>(json['date']),
       startTime: serializer.fromJson<int>(json['startTime']),
       endUsed: serializer.fromJson<bool>(json['endUsed']),
-      endTime: serializer.fromJson<int>(json['endTime']),
+      endTime: serializer.fromJson<int?>(json['endTime']),
       repeatType: serializer.fromJson<String>(json['repeatType']),
       repeatEndUsed: serializer.fromJson<bool>(json['repeatEndUsed']),
       repeatEndDate: serializer.fromJson<DateTime?>(json['repeatEndDate']),
@@ -378,7 +380,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
       'date': serializer.toJson<DateTime>(date),
       'startTime': serializer.toJson<int>(startTime),
       'endUsed': serializer.toJson<bool>(endUsed),
-      'endTime': serializer.toJson<int>(endTime),
+      'endTime': serializer.toJson<int?>(endTime),
       'repeatType': serializer.toJson<String>(repeatType),
       'repeatEndUsed': serializer.toJson<bool>(repeatEndUsed),
       'repeatEndDate': serializer.toJson<DateTime?>(repeatEndDate),
@@ -392,7 +394,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     DateTime? date,
     int? startTime,
     bool? endUsed,
-    int? endTime,
+    Value<int?> endTime = const Value.absent(),
     String? repeatType,
     bool? repeatEndUsed,
     Value<DateTime?> repeatEndDate = const Value.absent(),
@@ -403,7 +405,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     date: date ?? this.date,
     startTime: startTime ?? this.startTime,
     endUsed: endUsed ?? this.endUsed,
-    endTime: endTime ?? this.endTime,
+    endTime: endTime.present ? endTime.value : this.endTime,
     repeatType: repeatType ?? this.repeatType,
     repeatEndUsed: repeatEndUsed ?? this.repeatEndUsed,
     repeatEndDate:
@@ -484,7 +486,7 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
   final Value<DateTime> date;
   final Value<int> startTime;
   final Value<bool> endUsed;
-  final Value<int> endTime;
+  final Value<int?> endTime;
   final Value<String> repeatType;
   final Value<bool> repeatEndUsed;
   final Value<DateTime?> repeatEndDate;
@@ -507,15 +509,14 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     required DateTime date,
     required int startTime,
     required bool endUsed,
-    required int endTime,
+    this.endTime = const Value.absent(),
     this.repeatType = const Value.absent(),
     this.repeatEndUsed = const Value.absent(),
     this.repeatEndDate = const Value.absent(),
   }) : title = Value(title),
        date = Value(date),
        startTime = Value(startTime),
-       endUsed = Value(endUsed),
-       endTime = Value(endTime);
+       endUsed = Value(endUsed);
   static Insertable<ScheduledData> custom({
     Expression<int>? id,
     Expression<String>? title,
@@ -549,7 +550,7 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     Value<DateTime>? date,
     Value<int>? startTime,
     Value<bool>? endUsed,
-    Value<int>? endTime,
+    Value<int?>? endTime,
     Value<String>? repeatType,
     Value<bool>? repeatEndUsed,
     Value<DateTime?>? repeatEndDate,
@@ -1133,7 +1134,7 @@ typedef $$ScheduledTableCreateCompanionBuilder =
       required DateTime date,
       required int startTime,
       required bool endUsed,
-      required int endTime,
+      Value<int?> endTime,
       Value<String> repeatType,
       Value<bool> repeatEndUsed,
       Value<DateTime?> repeatEndDate,
@@ -1146,7 +1147,7 @@ typedef $$ScheduledTableUpdateCompanionBuilder =
       Value<DateTime> date,
       Value<int> startTime,
       Value<bool> endUsed,
-      Value<int> endTime,
+      Value<int?> endTime,
       Value<String> repeatType,
       Value<bool> repeatEndUsed,
       Value<DateTime?> repeatEndDate,
@@ -1355,7 +1356,7 @@ class $$ScheduledTableTableManager
                 Value<DateTime> date = const Value.absent(),
                 Value<int> startTime = const Value.absent(),
                 Value<bool> endUsed = const Value.absent(),
-                Value<int> endTime = const Value.absent(),
+                Value<int?> endTime = const Value.absent(),
                 Value<String> repeatType = const Value.absent(),
                 Value<bool> repeatEndUsed = const Value.absent(),
                 Value<DateTime?> repeatEndDate = const Value.absent(),
@@ -1379,7 +1380,7 @@ class $$ScheduledTableTableManager
                 required DateTime date,
                 required int startTime,
                 required bool endUsed,
-                required int endTime,
+                Value<int?> endTime = const Value.absent(),
                 Value<String> repeatType = const Value.absent(),
                 Value<bool> repeatEndUsed = const Value.absent(),
                 Value<DateTime?> repeatEndDate = const Value.absent(),

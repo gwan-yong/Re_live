@@ -42,13 +42,16 @@ class ScheduledEventList extends StatelessWidget {
             schedule.startTime % 60,
           );
 
-          final scheduledEnd = DateTime(
-            selectedDate.year,
-            selectedDate.month,
-            selectedDate.day,
-            schedule.endTime ~/ 60,
-            schedule.endTime % 60,
-          );
+          DateTime? scheduledEnd;
+          if (schedule.endUsed && schedule.endTime != null) {
+            scheduledEnd = DateTime(
+              selectedDate.year,
+              selectedDate.month,
+              selectedDate.day,
+              schedule.endTime! ~/ 60,
+              schedule.endTime! % 60,
+            );
+          }
 
           if (scheduledStart.isAfter(now)) {
             //일정 알림 등록
@@ -70,7 +73,7 @@ class ScheduledEventList extends StatelessWidget {
               _formatTime(schedule.endTime),
               schedule.color ?? 0,
             );
-          } else {
+          } else if (scheduledEnd != null) {
             // 종료 시간 사용 시: 종료 시간이 지났다면 놓침
             showMissedScheduleNotification(
               schedule.id,
@@ -94,46 +97,25 @@ class ScheduledEventList extends StatelessWidget {
             shrinkWrap: true,
             children:
                 schedules.map((schedule) {
-                  final startTime = _formatTime(schedule.startTime);
-                  final endTime = _formatTime(schedule.endTime);
-                  final color = Color(
-                    schedule.color ?? 0xFFCCCCCC,
-                  ); // color가 null일 수 있음
+                  return Container(
+                    child: ListView(
+                      physics: isScrollable
+                          ? AlwaysScrollableScrollPhysics()
+                          : NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      children: schedules.map((schedule) {
+                        final startTime = _formatTime(schedule.startTime);
+                        final endTime = _formatTime(schedule.endTime);
+                        final color = Color(schedule.color ?? 0xFFCCCCCC);
 
-                  return Dismissible(
-                    key: Key(schedule.id.toString()),
-                    // 고유 키를 사용하여 각 항목을 구분
-                    onDismissed: (direction) async {
-                      // 삭제 동작 구현
-                      await notifications.cancel(schedule.id); // 해당 ID의 알림 삭제
-                      await notifications.cancel(
-                        schedule.id + 10000,
-                      ); // 해당 ID의 놓친 일정 알림 삭제
-                      await database.deleteSchedule(
-                        schedule.id,
-                      ); // 데이터베이스에서 해당 스케줄 삭제
-                      print(
-                        "id : ${schedule.id} , title : ${schedule.title} 일정이 삭제됨",
-                      );
-                    },
-                    background: Container(
-                      color: Colors.red, // 스와이프 시 배경색 설정
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 20.0),
-                          child: Icon(Icons.delete, color: Colors.white),
-                        ),
-                      ),
-                    ),
-                    direction: DismissDirection.endToStart,
-                    // 오른쪽에서 왼쪽으로 스와이프하여 삭제
-                    child: _EventTile(
-                      schedule.title,
-                      startTime,
-                      schedule.endUsed,
-                      endTime,
-                      color,
+                        return _EventTile(
+                          schedule.title,
+                          startTime,
+                          schedule.endUsed,
+                          endTime,
+                          color,
+                        );
+                      }).toList(),
                     ),
                   );
                 }).toList(),
@@ -144,7 +126,10 @@ class ScheduledEventList extends StatelessWidget {
   }
 
   // 시간(정수)을 "오후 6시" 같은 텍스트로 변환
-  String _formatTime(int rawTime) {
+  String _formatTime(int? rawTime) {
+
+    if (rawTime == null) return '-'; // 또는 '' 빈 문자열 등
+
     final hour = rawTime ~/ 60;
     final minute = rawTime % 60;
     final time = TimeOfDay(hour: hour, minute: minute);

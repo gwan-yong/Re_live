@@ -141,7 +141,7 @@ class LocalDatabase extends _$LocalDatabase {
         if (start <= nowMinutes && nowMinutes <= start + 30) {
           return schedule;
         }
-      } else {
+      } else if (end != null) {
         // 시작 시간과 종료 시간 사이인지 확인
         if (start <= nowMinutes && nowMinutes < end) {
           return schedule;

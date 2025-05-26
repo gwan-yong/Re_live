@@ -74,8 +74,8 @@ class PhotosUploadScreen extends StatelessWidget {
         final startTime = schedule != null
             ? _formatTime(schedule.startTime)
             : _getCurrentFormattedTime();
-        final endTime = schedule != null
-            ? _formatTime(schedule.endTime)
+        final endTime = schedule != null && schedule.endTime != null
+            ? _formatTime(schedule.endTime!)
             : _getCurrentFormattedTime();
         final endUsed = schedule?.endUsed ?? false;
 
