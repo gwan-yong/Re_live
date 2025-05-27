@@ -8,6 +8,7 @@ class DbScheduleController extends GetxController {
   static DbScheduleController get to => Get.find();
 
   var schedules = <ScheduledData>[].obs;
+  var lateSchedules = <ScheduledData>[].obs;
   Rx<DateTime> get selectDate => SelectScheduleController.to.selectDate;
 
   @override
@@ -20,6 +21,7 @@ class DbScheduleController extends GetxController {
 
     // 초기 로딩
     loadSchedules();
+    loadLateSchedules();
   }
 
   Future<void> loadSchedules() async {
@@ -56,4 +58,10 @@ class DbScheduleController extends GetxController {
     final db = DatabaseService.to.db;
     return await db.getCurrentRunningSchedule();
   }
+
+  Future<void> loadLateSchedules() async {
+    final db = DatabaseService.to.db;
+    lateSchedules.value = await db.getTodayLateSchedules();
+  }
+
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:re_live/widget/schedule_tile.dart';
 import '../controller/db_schedule_controller.dart';
 import '../controller/notification_controller.dart';
 import '../controller/select_schedule_controller.dart';
@@ -31,15 +32,13 @@ class ScheduledEventList extends StatelessWidget {
               : const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           children: schedules.map((schedule) {
-            final startTime = _formatTime(schedule.startTime);
-            final endTime = _formatTime(schedule.endTime);
             final color = Color(schedule.color ?? 0xFFCCCCCC);
 
-            return EventTile(
+            return ScheduleTile(
               title: schedule.title,
-              startTime: startTime,
+              startTime: schedule.startTime,
               endUsed: schedule.endUsed,
-              endTime: endTime,
+              endTime: schedule.endTime,
               color: color,
               onTap: () => _handleTap(context, schedule, color),
             );
@@ -68,67 +67,8 @@ class ScheduledEventList extends StatelessWidget {
     );
   }
 
-  String _formatTime(int? minutes) {
-    if (minutes == null) return '-';
-    final hour = minutes ~/ 60;
-    final minute = minutes % 60;
-    final time = TimeOfDay(hour: hour, minute: minute);
-    final now = DateTime.now();
-    final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-    return DateFormat.jm('ko').format(dt);
-  }
-
   TimeOfDay? _intToTimeOfDay(int? minutes) {
     if (minutes == null) return null;
     return TimeOfDay(hour: minutes ~/ 60, minute: minutes % 60);
-  }
-}
-
-class EventTile extends StatelessWidget {
-  final String title;
-  final String startTime;
-  final bool endUsed;
-  final String endTime;
-  final Color color;
-  final VoidCallback onTap;
-
-  const EventTile({
-    required this.title,
-    required this.startTime,
-    required this.endUsed,
-    required this.endTime,
-    required this.color,
-    required this.onTap,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        width: double.infinity,
-        height: 90,
-        padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.symmetric(vertical: 5),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: const TextStyle(fontSize: 25)),
-            Row(
-              children: [
-                Text(startTime),
-                if (endUsed) Text(" ~ $endTime"),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
