@@ -12,12 +12,10 @@ class DbCompleteScheduleController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
     // 날짜가 바뀔 때마다 자동으로 일정 로딩
     ever(selectDate, (_) {
       loadCompleteSchedules(selectDate.value);
     });
-
     // 초기 로딩
     loadCompleteSchedules(selectDate.value);
   }

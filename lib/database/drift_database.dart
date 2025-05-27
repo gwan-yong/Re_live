@@ -41,85 +41,55 @@ class LocalDatabase extends _$LocalDatabase {
   }
 
   //해당 날짜에 실행 예정인 일정 출력
-  Future<List<ScheduledData>> getSchedulesByDate(DateTime selectedDate) async {
-    final selectedDay = DateTime(
-      selectedDate.year,
-      selectedDate.month,
-      selectedDate.day,
-    );
+  Future<List<ScheduledData>> getSchedulesByDate(DateTime targetDate) async {
+    final allSchedules = await select(scheduled).get();
+    final completed = await select(completedScheduled).get();
 
-    final allSchedules =
-        await (select(scheduled).join([
-          leftOuterJoin(
-            completedScheduled,
-            completedScheduled.scheduledId.equalsExp(scheduled.id),
-          ),
-        ])..where(
-          completedScheduled.id.isNull() |
-          completedScheduled.takenAt.isNotNull(), // takenAt이 존재할 때
-        )).get();
+    // targetDate를 기준으로 연, 월, 일만 비교하도록 normalization
+    final normalizedTargetDate = DateTime(targetDate.year, targetDate.month, targetDate.day);
 
-    final validSchedules =
-        allSchedules
-            .where((row) {
-              final schedule = row.readTable(scheduled);
-              final photo = row.readTableOrNull(completedScheduled);
+    // completedSchedule 중 이미 완료된 scheduleId 목록 수집
+    final completedOnTargetDate = completed.where((c) {
+      final taken = DateTime(c.takenAt.year, c.takenAt.month, c.takenAt.day);
+      return taken == normalizedTargetDate;
+    }).map((c) => c.scheduledId).whereType<int>().toSet();
 
-              // 만약 completedPhotos에 takenAt이 있다면 같은 날짜인지 확인
-              if (photo != null) {
-                final takenAt = photo.takenAt;
-                final takenDay = DateTime(
-                  takenAt.year,
-                  takenAt.month,
-                  takenAt.day,
-                );
-                if (takenDay == selectedDay) {
-                  return false; // 이미 오늘 찍은 사진이 있으므로 제외
-                }
-              }
+    return allSchedules.where((s) {
+      final startDate = DateTime(s.date.year, s.date.month, s.date.day);
+      final isAfterStart = !normalizedTargetDate.isBefore(startDate);
 
-              final baseDate = DateTime(
-                schedule.date.year,
-                schedule.date.month,
-                schedule.date.day,
-              );
-              final repeatType = schedule.repeatType;
+      // 반복 종료 조건 체크
+      if (s.repeatEndUsed &&
+          s.repeatEndDate != null &&
+          normalizedTargetDate.isAfter(DateTime(s.repeatEndDate!.year, s.repeatEndDate!.month, s.repeatEndDate!.day))) {
+        return false;
+      }
 
-              if (repeatType == '없음') {
-                return baseDate == selectedDay;
-              }
+      // 이미 완료된 항목은 제외
+      if (completedOnTargetDate.contains(s.id)) return false;
 
-              if (schedule.repeatEndUsed) {
-                final endDate = DateTime(
-                  schedule.repeatEndDate!.year,
-                  schedule.repeatEndDate!.month,
-                  schedule.repeatEndDate!.day,
-                );
-                if (selectedDay.isAfter(endDate)) return false;
-              }
+      switch (s.repeatType) {
+        case '없음':
+          return startDate == normalizedTargetDate;
 
-              switch (repeatType) {
-                case '매일':
-                  return !selectedDay.isBefore(baseDate);
-                case '매주':
-                  return !selectedDay.isBefore(baseDate) &&
-                      baseDate.weekday == selectedDay.weekday;
-                case '매월':
-                  return !selectedDay.isBefore(baseDate) &&
-                      baseDate.day == selectedDay.day;
-                case '매년':
-                  return !selectedDay.isBefore(baseDate) &&
-                      baseDate.day == selectedDay.day &&
-                      baseDate.month == selectedDay.month;
-                default:
-                  return false;
-              }
-            })
-            .map((row) => row.readTable(scheduled))
-            .toList();
+        case '매일':
+          return isAfterStart;
 
-    validSchedules.sort((a, b) => a.startTime.compareTo(b.startTime));
-    return validSchedules;
+        case '매주':
+          return isAfterStart && startDate.weekday == normalizedTargetDate.weekday;
+
+        case '매월':
+          return isAfterStart && startDate.day == normalizedTargetDate.day;
+
+        case '매년':
+          return isAfterStart &&
+              startDate.month == normalizedTargetDate.month &&
+              startDate.day == normalizedTargetDate.day;
+
+        default:
+          return false;
+      }
+    }).toList();
   }
 
   //현재 진행중인 일정 가져오기
@@ -170,12 +140,12 @@ class LocalDatabase extends _$LocalDatabase {
     ); // 선택 날짜 다음날 00:00
 
     return await (select(completedScheduled)
-          ..where(
+      ..where(
             (tbl) => tbl.takenAt.isBetweenValues(selectDay, selectDayTomorrow),
-          )
-          ..orderBy([
+      )
+      ..orderBy([
             (tbl) => OrderingTerm(expression: tbl.takenAt), // 오름차순 정렬
-          ]))
+      ]))
         .get();
   }
 

@@ -65,11 +65,35 @@ class _title extends StatelessWidget{
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'ReLive',
-            textAlign: TextAlign.left,
-            style : TextStyle(
-              fontSize : 50.0,
+          GestureDetector(
+            onTap: () async{
+              print("----------------------");
+              List<ScheduledData> schedules = await LocalDatabase().getAllSchedules();
+              for (var schedule in schedules) {
+                print('일정 id:${schedule.id} 제목: ${schedule.title}''날짜: ${schedule.date}');
+              }
+              print("-------");
+              List<CompletedScheduledData> completeSchedules = await LocalDatabase().getAllCompletePhotos();
+              for (var schedule in completeSchedules) {
+                print('완료 id:${schedule.id} 일정 id:${schedule.scheduledId} 날짜: ${schedule.takenAt}');
+              }
+              print("-------");
+              List<ScheduledData> nowSchedules = await LocalDatabase().getSchedulesByDate(DateTime.now());
+              for (var schedule in nowSchedules) {
+                print('일정 id:${schedule.id} '
+                    '제목: ${schedule.title}'
+                    '날짜: ${schedule.date}'
+                );
+              }
+              print("----------------------");
+
+            },
+            child: Text(
+              'ReLive',
+              textAlign: TextAlign.left,
+              style : TextStyle(
+                fontSize : 50.0,
+              ),
             ),
           ),
           IconButton(
