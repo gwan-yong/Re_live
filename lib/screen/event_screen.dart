@@ -12,320 +12,268 @@ import 'package:drift/drift.dart' as drift;
 import 'home_screen.dart';
 
 class EventScreen extends StatefulWidget {
-  EventScreen({super.key});
+  const EventScreen({super.key});
 
   @override
   State<EventScreen> createState() => _EventScreenState();
 }
 
 class _EventScreenState extends State<EventScreen> {
+  final selectId = SelectScheduleController.to.id.value;
+  bool _showDeleteOptions = false;
+  bool _showUpdateOptions = false;
+  bool _UpdateOptions = false;
+
   int timeOfDayToInt(TimeOfDay tod) => tod.hour * 60 + tod.minute;
 
-  bool _isValid() {
-    return SelectScheduleController.to.title.value.trim().isNotEmpty;
-  }
+  bool _isValid() => SelectScheduleController.to.title.value.trim().isNotEmpty;
 
-  void _printAllSchedules() async {
-    final schedules = await LocalDatabase().getAllSchedules();
-    for (final schedule in schedules) {
-      print(
-        'ID: ${schedule.id},'
-        ' Title: ${schedule.title},'
-        ' COLOR: ${schedule.color},'
-        ' Date: ${schedule.date}'
-        ' startTime: ${schedule.startTime},'
-        ' endUsed: ${schedule.endUsed},'
-        ' endTime: ${schedule.endTime},'
-        ' repeatType: ${schedule.repeatType},'
-        ' repeatEndUsed: ${schedule.repeatEndUsed},'
-        ' repeatEndDate: ${schedule.repeatEndDate},',
-      );
+  void initState() {
+    super.initState();
+    if (selectId >= 1) {
+      _UpdateOptions = true;
     }
   }
 
-  bool _showDeleteOptions = false;
-
   @override
   void dispose() {
-    // 화면이 사라질 때 초기화 실행
-    SelectScheduleController.to.reset();
+    SelectScheduleController.to.reset(); // 초기화
     super.dispose();
+  }
+
+  Future<void> _handleSingleDelete() async {
+    final id = SelectScheduleController.to.id.value;
+    final newComplete = CompletedScheduledCompanion(
+      scheduledId: drift.Value(id),
+      takenAt: drift.Value(SelectScheduleController.to.selectDate.value),
+      notDisplay: const drift.Value(true),
+    );
+
+    await DbCompleteScheduleController.to.addCompleteSchedule(newComplete);
+    _navigateHome();
+  }
+
+  Future<void> _handleFullDelete() async {
+    final id = SelectScheduleController.to.id.value;
+    await DbScheduleController.to.deleteSchedule(id);
+    _navigateHome();
+  }
+
+  Future<void> _handleSingleUpdate() async {
+    _handleSingleDelete();
+    final sc = SelectScheduleController.to;
+    final newSchedule = ScheduledCompanion(
+      title: drift.Value(sc.title.value),
+      color: drift.Value(sc.color.value.value),
+      date: drift.Value(sc.selectDate.value),
+      startTime: drift.Value(timeOfDayToInt(sc.startTime.value)),
+      endUsed: drift.Value(sc.endUsed.value),
+      endTime:
+      sc.endTime.value == null
+          ? const drift.Value.absent()
+          : drift.Value(timeOfDayToInt(sc.endTime.value!)),
+    );
+    await DbScheduleController.to.addSchedule(newSchedule);
+    _navigateHome();
+  }
+
+  Future<void> _handleFullUpdate() async {
+    final sc = SelectScheduleController.to;
+    final newSchedule = ScheduledCompanion(
+      title: drift.Value(sc.title.value),
+      color: drift.Value(sc.color.value.value),
+      date: drift.Value(sc.selectDate.value),
+      startTime: drift.Value(timeOfDayToInt(sc.startTime.value)),
+      endUsed: drift.Value(sc.endUsed.value),
+      endTime:
+      sc.endTime.value == null
+          ? const drift.Value.absent()
+          : drift.Value(timeOfDayToInt(sc.endTime.value!)),
+      repeatType: drift.Value(sc.repeatType.value),
+      repeatEndUsed: drift.Value(sc.repeatEndUsed.value),
+      repeatEndDate: drift.Value(sc.repeatEndDate.value),
+    );
+    await DbScheduleController.to.updateSchedule(sc.id.value,newSchedule);
+    _navigateHome();
+  }
+
+
+
+  void _navigateHome() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => HomeScreen()),
+    );
+  }
+
+  Widget _buildDeleteButtons() {
+    return Column(
+      children: [
+        _buildActionButton('이 일정만 삭제', Colors.red, _handleSingleDelete),
+        _buildActionButton('모든 반복 삭제', Colors.orange, _handleFullDelete),
+      ],
+    );
+  }
+
+  Widget _buildUpdateButtons() {
+    return Column(
+      children: [
+        _buildActionButton('이 일정만 적용', Colors.red, _handleSingleUpdate),
+        _buildActionButton('모든 반복 일정 적용', Colors.orange, _handleFullUpdate),
+      ],
+    );
+  }
+
+
+  Widget _buildActionButton(String label, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 350,
+        height: 50,
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildControlButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [_buildDeleteToggleButton(), Obx(() => _buildSubmitButton())],
+    );
+  }
+
+  Widget _buildDeleteToggleButton() {
+    return GestureDetector(
+      onTap: () async {
+        if (selectId >= 1) {
+          final schedule = await DbScheduleController.to.searchSchedule(
+            selectId,
+          );
+          if (schedule?.repeatType == "없음") {
+            await DbScheduleController.to.deleteSchedule(schedule!.id);
+            _navigateHome();
+          } else {
+            setState(() => _showDeleteOptions = !_showDeleteOptions);
+          }
+        }
+      },
+      child: Container(
+        width: 168,
+        height: 50,
+        decoration: BoxDecoration(
+          color:
+              _isValid()
+                  ? Colors.white.withOpacity(0.5)
+                  : Colors.grey.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Center(
+          child: Text(
+            _showDeleteOptions ? '취소' : '삭제',
+            style: TextStyle(
+              color: _isValid() ? Colors.black : Colors.grey[600],
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return AbsorbPointer(
+      absorbing: !_isValid(),
+      child: GestureDetector(
+        onTap: () async {
+          final sc = SelectScheduleController.to;
+          final newSchedule = ScheduledCompanion(
+            title: drift.Value(sc.title.value),
+            color: drift.Value(sc.color.value.value),
+            date: drift.Value(sc.selectDate.value),
+            startTime: drift.Value(timeOfDayToInt(sc.startTime.value)),
+            endUsed: drift.Value(sc.endUsed.value),
+            endTime:
+                sc.endTime.value == null
+                    ? const drift.Value.absent()
+                    : drift.Value(timeOfDayToInt(sc.endTime.value!)),
+            repeatType: drift.Value(sc.repeatType.value),
+            repeatEndUsed: drift.Value(sc.repeatEndUsed.value),
+            repeatEndDate: drift.Value(sc.repeatEndDate.value),
+          );
+
+          if(_UpdateOptions){
+            //기존의 일정을 불러와서 일정을 업데이트
+            setState(() => _showUpdateOptions = !_showUpdateOptions);
+          }
+          else{
+            //기존 일정이 없고 새로운 일정이기 떄문에 일정 추가
+            await DbScheduleController.to.addSchedule(newSchedule);
+            _navigateHome();
+          }
+        },
+        child: Container(
+          width: 168,
+          height: 50,
+          decoration: BoxDecoration(
+            color:
+                _isValid()
+                    ? Colors.white.withOpacity(0.5)
+                    : Colors.grey.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Center(
+            child: Text(
+              !_UpdateOptions
+                  ? '등록'
+                  : (_showUpdateOptions ? '취소' : '수정'),
+              style: TextStyle(
+                color: _isValid() ? Colors.black : Colors.grey[600],
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final backgroundColor = SelectScheduleController.to.color.value;
-
+      final bgColor = SelectScheduleController.to.color.value;
       return Scaffold(
-        backgroundColor: backgroundColor,
-        appBar: AppBar(title: Text("일정"), backgroundColor: backgroundColor),
+        backgroundColor: bgColor,
+        appBar: AppBar(title: const Text("일정"), backgroundColor: bgColor),
         body: SingleChildScrollView(
           child: SafeArea(
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     EventTitle(),
                     DateSetting(),
                     RepeatSetting(),
                     const SizedBox(height: 30),
-                    //삭제 옵션 버튼 표시
-                    if (_showDeleteOptions)
-                      Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () async {
-                              final id = SelectScheduleController.to.id.value;
-
-                              final newCompleteSchedule =
-                                  (CompletedScheduledCompanion(
-                                    scheduledId: drift.Value(id),
-                                    takenAt: drift.Value(
-                                      SelectScheduleController
-                                          .to
-                                          .selectDate
-                                          .value,
-                                    ),
-                                    notDisplay: drift.Value(true),
-                                  ));
-
-                              // CompletePhotos 테이블에 데이터 추가
-                              await DbCompleteScheduleController.to
-                                  .addCompleteSchedule(newCompleteSchedule);
-
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => HomeScreen(),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              width: 350,
-                              height: 50,
-                              margin: const EdgeInsets.only(bottom: 10),
-                              decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  '이 일정만 삭제',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          //반복 되는 모든 일정 삭제 하는 버튼
-                          GestureDetector(
-                            onTap: () async {
-                              final id = SelectScheduleController.to.id.value;
-                              await DbScheduleController.to.deleteSchedule(id);
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => HomeScreen(),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              width: 350,
-                              height: 50,
-                              margin: const EdgeInsets.only(bottom: 20),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  '모든 반복 삭제',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    if (_showDeleteOptions) _buildDeleteButtons(),
+                    if (_showUpdateOptions) _buildUpdateButtons(),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          GestureDetector(
-                            onTap: () async {
-                              final bool hasValidId =
-                                  SelectScheduleController.to.id.value >= 1;
-                              if (hasValidId) {
-                                ScheduledData? schedule =
-                                await DbScheduleController.to
-                                    .searchSchedule(
-                                  SelectScheduleController.to.id.value,
-                                );
-                                //반복하지 않는 일정
-                                final isRepeatNone =
-                                    schedule?.repeatType == "없음";
-                                if (isRepeatNone) {
-                                  await DbScheduleController.to.deleteSchedule(
-                                    schedule!.id,
-                                  );
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => HomeScreen(),
-                                    ),
-                                  );
-                                } else {
-                                  setState(() {
-                                    _showDeleteOptions =
-                                    !_showDeleteOptions; // 상태 토글
-                                  });
-                                }
-                              }
-                            },
-                            child: Container(
-                              width: 168,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color:
-                                    _isValid()
-                                        ? Colors.white.withOpacity(0.5)
-                                        : Colors.grey.withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  _showDeleteOptions ? '취소' : '삭제', //텍스트 전환
-                                  style: TextStyle(
-                                    color:
-                                        _isValid()
-                                            ? Colors.black
-                                            : Colors.grey[600],
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Obx(
-                            () => AbsorbPointer(
-                              absorbing: !_isValid(),
-                              child: GestureDetector(
-                                onTap: () async {
-                                  final newSchedule = ScheduledCompanion(
-                                    title: drift.Value(
-                                      SelectScheduleController.to.title.value,
-                                    ),
-                                    color: drift.Value(
-                                      SelectScheduleController
-                                          .to
-                                          .color
-                                          .value
-                                          .value,
-                                    ),
-                                    date: drift.Value(
-                                      SelectScheduleController
-                                          .to
-                                          .selectDate
-                                          .value,
-                                    ),
-                                    startTime: drift.Value(
-                                      timeOfDayToInt(
-                                        SelectScheduleController
-                                            .to
-                                            .startTime
-                                            .value,
-                                      ),
-                                    ),
-                                    endUsed: drift.Value(
-                                      SelectScheduleController.to.endUsed.value,
-                                    ),
-                                    endTime:
-                                        SelectScheduleController
-                                                    .to
-                                                    .endTime
-                                                    .value ==
-                                                null
-                                            ? const drift.Value.absent()
-                                            : drift.Value(
-                                              timeOfDayToInt(
-                                                SelectScheduleController
-                                                    .to
-                                                    .endTime
-                                                    .value!,
-                                              ),
-                                            ),
-                                    repeatType: drift.Value(
-                                      SelectScheduleController
-                                          .to
-                                          .repeatType
-                                          .value,
-                                    ),
-                                    repeatEndUsed: drift.Value(
-                                      SelectScheduleController
-                                          .to
-                                          .repeatEndUsed
-                                          .value,
-                                    ),
-                                    repeatEndDate: drift.Value(
-                                      SelectScheduleController
-                                          .to
-                                          .repeatEndDate
-                                          .value,
-                                    ),
-                                  );
-
-                                  await DbScheduleController.to.addSchedule(
-                                    newSchedule,
-                                  );
-
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => HomeScreen(),
-                                    ),
-                                  );
-                                  _printAllSchedules();
-                                  // 버튼 누른 후 reset()은 dispose()에서 이미 호출하므로 생략 가능
-                                },
-                                child: Container(
-                                  width: 168,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color:
-                                        _isValid()
-                                            ? Colors.white.withOpacity(0.5)
-                                            : Colors.grey.withOpacity(0.3),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      '등록',
-                                      style: TextStyle(
-                                        color:
-                                            _isValid()
-                                                ? Colors.black
-                                                : Colors.grey[600],
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      child: _buildControlButtons(),
                     ),
                   ],
                 ),

@@ -89,7 +89,8 @@ class LocalDatabase extends _$LocalDatabase {
         default:
           return false;
       }
-    }).toList();
+    }).toList()
+      ..sort((a, b) => a.startTime.compareTo(b.startTime));
   }
 
   //현재 진행중인 일정 가져오기
@@ -120,6 +121,13 @@ class LocalDatabase extends _$LocalDatabase {
     }
 
     return null; // 조건을 만족하는 일정이 없으면 null
+  }
+
+
+  //일정 수정
+  Future<void> updateSchedule(int id, ScheduledCompanion newValues) async {
+    await (update(scheduled)..where((tbl) => tbl.id.equals(id)))
+        .write(newValues);
   }
 
   //등록하지 못한 일정 가져오기

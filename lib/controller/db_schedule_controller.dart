@@ -64,4 +64,12 @@ class DbScheduleController extends GetxController {
     lateSchedules.value = await db.getTodayLateSchedules();
   }
 
+  Future<void> updateSchedule(int id, ScheduledCompanion newValues) async {
+    final db = DatabaseService.to.db;
+    await db.updateSchedule(id, newValues);
+    loadSchedules();
+  }
+
+
+
 }
