@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:re_live/theme/colors.dart';
 import 'package:re_live/widget/event_setting/date_picker_box.dart';
+import 'package:re_live/controller/select_schedule_controller.dart'; // 컨트롤러 import
 
 enum RepeatType {
   none,
@@ -11,16 +12,7 @@ enum RepeatType {
 }
 
 class RepeatSetting extends StatefulWidget {
-  final Function(String)? onRepeatTypeChanged; // 반복 타입 변경 콜백
-  final Function(bool) onRepeatEndUsedChanged; // 반복 종료 사용 변경 콜백
-  final Function(DateTime?)? onRepeatEndDateChanged; // 반복 종료 날짜 변경 콜백
-
-  const RepeatSetting({
-    super.key,
-    required this.onRepeatTypeChanged,
-    required this.onRepeatEndUsedChanged,
-    required this.onRepeatEndDateChanged,
-  });
+  const RepeatSetting({super.key});
 
   @override
   State<RepeatSetting> createState() => _RepeatSetting();
@@ -75,7 +67,8 @@ class _RepeatSetting extends State<RepeatSetting> {
                         setState(() {
                           selectedType = type;
                         });
-                        widget.onRepeatTypeChanged?.call(typeLabels[type]!);
+                        // 컨트롤러의 repeatType 업데이트
+                        SelectScheduleController.to.repeatType.value = typeLabels[type]!;
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -121,12 +114,15 @@ class _RepeatSetting extends State<RepeatSetting> {
                     onTap: () {
                       setState(() {
                         repeatDayUsed = !repeatDayUsed;
+
+                        // 컨트롤러 repeatEndUsed 업데이트
+                        SelectScheduleController.to.repeatEndUsed.value = repeatDayUsed;
+
                         if (!repeatDayUsed) {
                           repeatEndDate = null;
-                          widget.onRepeatEndDateChanged?.call(null);
+                          SelectScheduleController.to.repeatEndDate.value = null;
                         }
                       });
-                      widget.onRepeatEndUsedChanged(repeatDayUsed);
                     },
                     child: Container(
                       width: 70,
@@ -151,8 +147,20 @@ class _RepeatSetting extends State<RepeatSetting> {
                     DatePickerBox(
                       withTime: false,
                       onDateTimeChanged: (DateTime? date, TimeOfDay? _) {
-                        repeatEndDate = date;
-                        widget.onRepeatEndDateChanged?.call(date);
+                        setState(() {
+                          repeatEndDate = date;
+                        });
+
+                        // 컨트롤러 repeatEndDate 업데이트
+                        if (date != null) {
+                          if (SelectScheduleController.to.repeatEndDate == null) {
+                            SelectScheduleController.to.repeatEndDate.value = date;
+                          } else {
+                            SelectScheduleController.to.repeatEndDate!.value = date;
+                          }
+                        } else {
+                          SelectScheduleController.to.repeatEndDate.value = null;
+                        }
                       },
                     ),
                 ],

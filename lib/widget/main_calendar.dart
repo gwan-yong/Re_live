@@ -2,13 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:re_live/screen/event_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../controller/select_schedule_controller.dart';
 import '../database/drift_database.dart';
 import '../theme/colors.dart';
 
 class MainCalendar extends StatefulWidget {
-  final Function(DateTime selectedDate) onDateSelected; // 콜백 함수 선언
-
-  MainCalendar({required this.onDateSelected}); // 부모로부터 콜백 함수 받기
+  const MainCalendar({super.key});
 
   @override
   _MainCalendarState createState() => _MainCalendarState();
@@ -176,8 +175,8 @@ class _MainCalendarState extends State<MainCalendar> {
                 setState(() {
                   _focusedDay = focusedDay; // 선택된 날짜로 업데이트
                   _selectedDay = selectedDay; // 선택된 날짜 상태 업데이트
+                  SelectScheduleController.to.selectDate.value = selectedDay;
                 });
-                widget.onDateSelected(selectedDay); // 부모로 날짜 전달
               },
             ),
           ),
@@ -204,11 +203,10 @@ class _MainCalendarState extends State<MainCalendar> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => EventScreen(
-                          initialDate: _selectedDay ?? _focusedDay,
-                        ),
+                        builder: (context) => EventScreen(),
                       ),
                     );
+                    SelectScheduleController.to.selectDate.value = _selectedDay ?? _focusedDay;
                     print(_selectedDay ?? _focusedDay);
                   },
                   icon: Icon(Icons.add),

@@ -3,6 +3,7 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:re_live/screen/camera_screen.dart';
+import '../controller/db_complete_schedule_controller.dart';
 import '../database/drift_database.dart';
 import '../notification.dart';
 import '../theme/colors.dart';
@@ -33,6 +34,7 @@ class MissedEventJournal extends StatefulWidget {
 class _MissedEventJournalState extends State<MissedEventJournal> {
   String rearImagePath = '';
   String frontImagePath = '';
+  final TextEditingController _lateCommentController = TextEditingController();
 
   void _goToCameraScreen() async {
     final result = await Navigator.push(
@@ -112,6 +114,7 @@ class _MissedEventJournalState extends State<MissedEventJournal> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: TextField(
+                controller: _lateCommentController,
                 onTapOutside:
                     (event) => FocusManager.instance.primaryFocus?.unfocus(),
                 minLines: 1,
@@ -161,37 +164,51 @@ class _MissedEventJournalState extends State<MissedEventJournal> {
             ),
             GestureDetector(
               onTap: () async {
-                final db = LocalDatabase();
-                // 이미지 저장 경로 얻기
-                final rearPath = await _saveImageToInternalStorage(
-                  File(rearImagePath),
-                  "rear",
-                );
-                final frontPath = await _saveImageToInternalStorage(
-                  File(frontImagePath),
-                  "front",
+                // 텍스트 필드에 글자가 하나 이상 있어야 등록 가능
+                if (_lateCommentController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('코멘트를 입력해야 등록할 수 있어요!')),
+                  );
+                  return;
+                }
+
+                String? rearPath;
+                String? frontPath;
+
+                // rearImagePath가 비어있지 않으면 저장
+                if (rearImagePath.isNotEmpty) {
+                  rearPath = await _saveImageToInternalStorage(
+                    File(rearImagePath),
+                    "rear",
+                  );
+                  print("저장된 후면 사진 경로: $rearPath");
+                }
+
+                // frontImagePath가 비어있지 않으면 저장
+                if (frontImagePath.isNotEmpty) {
+                  frontPath = await _saveImageToInternalStorage(
+                    File(frontImagePath),
+                    "front",
+                  );
+                  print("저장된 전면 사진 경로: $frontPath");
+                }
+
+                // CompleteScheduled 테이블에 데이터 추가
+                final newCompleteSchedule = CompletedScheduledCompanion(
+                  scheduledId: drift.Value(widget.scheduledId),
+                  frontImgPath: drift.Value(frontPath ?? ''), // 없으면 빈 문자열
+                  rearImgPath: drift.Value(rearPath ?? ''),   // 없으면 빈 문자열
+                  takenAt: drift.Value(DateTime.now()),
+                  lateComment: drift.Value(_lateCommentController.text.trim()),
                 );
 
-                print("저장된 후면 사진 경로: $rearPath");
-                print("저장된 전면 사진 경로: $frontPath");
+                await DbCompleteScheduleController.to.addCompleteSchedule(newCompleteSchedule);
 
-                // 현재 시간 구하기
-                final currentTime = DateTime.now();
-
-                // CompletePhotos 테이블에 데이터 추가
-                await db.insertCompletePhoto(
-                  CompletedPhotosCompanion(
-                    scheduledId: drift.Value(widget.scheduledId),
-                    frontImgPath: drift.Value(frontPath),
-                    rearImgPath: drift.Value(rearPath),
-                    takenAt: drift.Value(currentTime),
-                  ),
-                );
-                await notifications.cancel(
-                  widget.scheduledId + 10000,
-                ); // 해당 ID의 놓친 일정 알림 삭제
+                // 알림 제거
+                await notifications.cancel(widget.scheduledId + 10000);
                 print('일정 완료 처리됨');
-                //저장 후 HomeScreen으로 이동
+
+                // 홈으로 이동
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => HomeScreen()),

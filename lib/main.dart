@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:re_live/screen/home_screen.dart';
 
 import 'package:intl/date_symbol_data_local.dart';  // 로케일 데이터 초기화용
-import 'package:re_live/screen/missed_event_journal.dart';
+import 'package:re_live/services/database_service.dart';
+import 'controller/db_complete_schedule_controller.dart';
+import 'controller/db_schedule_controller.dart';
+import 'controller/notification_controller.dart';
+import 'controller/select_schedule_controller.dart';
 import 'notification.dart';
 
 void main() async {
@@ -10,6 +16,13 @@ void main() async {
   // 한국어 로케일 초기화
   await initializeDateFormatting('ko_KR', null);
   await initNotification();
+  Get.put(DatabaseService());
+  Get.put(SelectScheduleController());
+  Get.put(DbScheduleController());
+  Get.put(DbCompleteScheduleController());
+  Get.put(NotificationController());
+
+
 
   runApp(
     MaterialApp(
@@ -19,14 +32,6 @@ void main() async {
         fontFamily: 'BMJUA',
       ),
       home: HomeScreen(),
-      /*MissedEventJournal(
-          scheduledId: 1,
-          title: '운동하기',
-          startTime: '오후 7시',
-          endUsed: false,
-          endTime: '컨디션 안 좋음',
-          color:Colors.red
-      ),*/
     ),
   );
 }
