@@ -85,6 +85,14 @@ class _title extends StatelessWidget{
                     '날짜: ${schedule.date}'
                 );
               }
+              print("-------");
+              List<ScheduledData> lateSchedules = await LocalDatabase().getTodayLateSchedules();
+              for (var schedule in lateSchedules) {
+                print('놓친 일정 id:${schedule.id} '
+                    '제목: ${schedule.title}'
+                    '날짜: ${schedule.date}'
+                );
+              }
               print("----------------------");
 
             },

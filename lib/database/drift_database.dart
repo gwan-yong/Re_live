@@ -122,6 +122,27 @@ class LocalDatabase extends _$LocalDatabase {
     return null; // 조건을 만족하는 일정이 없으면 null
   }
 
+  //등록하지 못한 일정 가져오기
+  Future<List<ScheduledData>> getTodayLateSchedules() async {
+    final today = DateTime.now();
+    final startOfDay = DateTime(today.year, today.month, today.day); // 오늘 00:00
+    final startOfNextDay = startOfDay.add(Duration(days: 1));         // 내일 00:00
+
+    final query = select(scheduled).join([
+      innerJoin(
+        completedScheduled,
+        completedScheduled.scheduledId.equalsExp(scheduled.id),
+        useColumns: false,
+      )
+    ])
+      ..where(completedScheduled.takenAt.isBetweenValues(startOfDay, startOfNextDay))
+      ..where(completedScheduled.lateComment.isNotNull());
+
+    final result = await query.get();
+    return result.map((row) => row.readTable(scheduled)).toList();
+  }
+
+
   //완료 일정 등록하기
   Future<int> insertCompleteSchedule(CompletedScheduledCompanion schedule ) {
     return into(completedScheduled).insert(schedule);
@@ -133,7 +154,7 @@ class LocalDatabase extends _$LocalDatabase {
   }
 
   //해당 날짜에 완료된 일정들 출력하기
-  Future<List<CompletedScheduledData>> getTodayPhotos(DateTime date) async {
+  Future<List<CompletedScheduledData>> getTodayCompeteScheduled(DateTime date) async {
     final selectDay = DateTime(date.year, date.month, date.day); // 선택 날짜 00:00
     final selectDayTomorrow = selectDay.add(
       Duration(days: 1),
@@ -182,6 +203,8 @@ class LocalDatabase extends _$LocalDatabase {
 
     return result;
   }
+
+
 }
 
 LazyDatabase _openConnection() {
