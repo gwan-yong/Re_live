@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
-import 'package:ios_color_picker/show_ios_color_picker.dart';
 import 'package:re_live/widget/event_setting/date_setting.dart';
 import 'package:re_live/widget/event_setting/repeat_setting.dart';
 import '../controller/db_schedule_controller.dart';
@@ -15,15 +14,14 @@ class EventScreen extends StatefulWidget {
   EventScreen({super.key});
 
   @override
-  State<EventScreen> createState() => _EventScreen();
+  State<EventScreen> createState() => _EventScreenState();
 }
 
-class _EventScreen extends State<EventScreen> {
-  Color backgroundColor = SelectScheduleController.to.color.value;
+class _EventScreenState extends State<EventScreen> {
+  int timeOfDayToInt(TimeOfDay tod) => tod.hour * 60 + tod.minute;
 
-  @override
-  void initState() {
-    super.initState();
+  bool _isValid() {
+    return SelectScheduleController.to.title.value.trim().isNotEmpty;
   }
 
   void _printAllSchedules() async {
@@ -31,31 +29,26 @@ class _EventScreen extends State<EventScreen> {
     for (final schedule in schedules) {
       print(
         'ID: ${schedule.id},'
-        ' Title: ${schedule.title},'
-        ' COLOR: ${schedule.color},'
-        ' Date: ${schedule.date}'
-        ' startTime: ${schedule.startTime},'
-        ' endUsed: ${schedule.endUsed},'
-        ' endTime: ${schedule.endTime},'
-        ' repeatType: ${schedule.repeatType},'
-        ' repeatEndUsed: ${schedule.repeatEndUsed},'
-        ' repeatEndDate: ${schedule.repeatEndDate},',
+            ' Title: ${schedule.title},'
+            ' COLOR: ${schedule.color},'
+            ' Date: ${schedule.date}'
+            ' startTime: ${schedule.startTime},'
+            ' endUsed: ${schedule.endUsed},'
+            ' endTime: ${schedule.endTime},'
+            ' repeatType: ${schedule.repeatType},'
+            ' repeatEndUsed: ${schedule.repeatEndUsed},'
+            ' repeatEndDate: ${schedule.repeatEndDate},',
       );
     }
   }
 
-  int timeOfDayToInt(TimeOfDay tod) => tod.hour * 60 + tod.minute;
-
-  bool _isValid() {
-    return SelectScheduleController.to.title.value.trim().isNotEmpty;
-  }
-
   @override
   void dispose() {
+    // 화면이 사라질 때 초기화 실행
+    SelectScheduleController.to.reset();
     super.dispose();
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -104,13 +97,11 @@ class _EventScreen extends State<EventScreen> {
                                 SelectScheduleController.to.endUsed.value,
                               ),
                               endTime:
-                              SelectScheduleController.to.endTime.value ==
-                                  null
+                              SelectScheduleController.to.endTime.value == null
                                   ? const drift.Value.absent()
                                   : drift.Value(
                                 timeOfDayToInt(
-                                  SelectScheduleController
-                                      .to.endTime.value!,
+                                  SelectScheduleController.to.endTime.value!,
                                 ),
                               ),
                               repeatType: drift.Value(
@@ -124,9 +115,7 @@ class _EventScreen extends State<EventScreen> {
                               ),
                             );
 
-                            await DbScheduleController.to.addSchedule(
-                              newSchedule,
-                            );
+                            await DbScheduleController.to.addSchedule(newSchedule);
 
                             Navigator.pushReplacement(
                               context,
@@ -135,7 +124,7 @@ class _EventScreen extends State<EventScreen> {
                               ),
                             );
                             _printAllSchedules();
-                            SelectScheduleController(); // 아마 이 줄은 초기화 목적이라면 수정 필요
+                            // 버튼 누른 후 reset()은 dispose()에서 이미 호출하므로 생략 가능
                           },
                           child: Container(
                             width: 348,
@@ -150,9 +139,7 @@ class _EventScreen extends State<EventScreen> {
                               child: Text(
                                 '등록',
                                 style: TextStyle(
-                                  color: _isValid()
-                                      ? Colors.black
-                                      : Colors.grey[600],
+                                  color: _isValid() ? Colors.black : Colors.grey[600],
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

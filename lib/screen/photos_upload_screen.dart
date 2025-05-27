@@ -3,6 +3,8 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:re_live/controller/db_complete_schedule_controller.dart';
+import 'package:re_live/controller/db_schedule_controller.dart';
 import '../database/drift_database.dart';
 import '../notification.dart';
 import '../theme/colors.dart';
@@ -18,8 +20,8 @@ class PhotosUploadScreen extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
-  void _printAllCompletePhotos(LocalDatabase db) async {
-    final CompletedPhotos = await db.getAllCompletePhotos();
+  void _printAllCompletePhotos() async {
+    final CompletedPhotos = await LocalDatabase().getAllCompletePhotos();
     for (final completedPhoto in CompletedPhotos) {
       print(
         'ID: ${completedPhoto.id},'
@@ -50,10 +52,9 @@ class PhotosUploadScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final db = LocalDatabase(); // 이 줄이 핵심! 내부에서 DB 생성
 
     return FutureBuilder<ScheduledData?>(
-      future: db.getCurrentRunningSchedule(),
+      future: DbScheduleController.to.getCurrentRunning(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -71,12 +72,15 @@ class PhotosUploadScreen extends StatelessWidget {
 
         final title = schedule?.title ?? '예정 없음';
         final color = Color(schedule?.color ?? 0xFFCCCCCC);
-        final startTime = schedule != null
-            ? _formatTime(schedule.startTime)
+
+        final startTime = schedule?.startTime != null
+            ? _formatTime(schedule!.startTime!)
             : _getCurrentFormattedTime();
-        final endTime = schedule != null && schedule.endTime != null
-            ? _formatTime(schedule.endTime!)
+
+        final endTime = schedule?.endTime != null
+            ? _formatTime(schedule!.endTime!)
             : _getCurrentFormattedTime();
+
         final endUsed = schedule?.endUsed ?? false;
 
         return Scaffold(
@@ -109,7 +113,6 @@ class PhotosUploadScreen extends StatelessWidget {
                 ),
                 GestureDetector(
                   onTap: () async {
-                    final db = LocalDatabase();
                     // 이미지 저장 경로 얻기
                     final rearPath = await _saveImageToInternalStorage(File(rearImagePath), "rear");
                     final frontPath = await _saveImageToInternalStorage(File(frontImagePath), "front");
@@ -117,19 +120,20 @@ class PhotosUploadScreen extends StatelessWidget {
                     print("저장된 후면 사진 경로: $rearPath");
                     print("저장된 전면 사진 경로: $frontPath");
 
-                    // 현재 시간 구하기
-                    final currentTime = DateTime.now();
 
                     // _getCurrentRunningSchedule에서 scheduledId 가져오기
-                    final currentSchedule = await db.getCurrentRunningSchedule();
+                    final currentSchedule = await DbScheduleController.to.getCurrentRunning();
 
-                    // CompletePhotos 테이블에 데이터 추가
-                    await db.insertCompletePhoto(CompletedPhotosCompanion(
+                    final newCompleteSchedule = (CompletedScheduledCompanion(
                       scheduledId: drift.Value(currentSchedule?.id),
                       frontImgPath: drift.Value(frontPath),
                       rearImgPath: drift.Value(rearPath),
-                      takenAt: drift.Value(currentTime),
+                      takenAt: drift.Value(DateTime.now()),
                     ));
+
+                    // CompletePhotos 테이블에 데이터 추가
+                    await DbCompleteScheduleController.to.addCompleteSchedule(newCompleteSchedule);
+
                     if (currentSchedule != null) {
                       await notifications.cancel(currentSchedule.id + 10000); // 해당 ID의 놓친 일정 알림 삭제
                       print('일정 완료 처리됨');
@@ -137,7 +141,7 @@ class PhotosUploadScreen extends StatelessWidget {
                       print('현재 진행 중인 일정이 없습니다.');
                     }
 
-                    _printAllCompletePhotos(db);
+                    _printAllCompletePhotos();
 
                     //저장 후 HomeScreen으로 이동
                     Navigator.pushReplacement(

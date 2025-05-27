@@ -5,11 +5,11 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:re_live/model/scheduled.dart';
-import '../model/completed_photos.dart';
+import '../model/completed_scheduled.dart';
 
 part 'drift_database.g.dart';
 
-@DriftDatabase(tables: [Scheduled, CompletedPhotos])
+@DriftDatabase(tables: [Scheduled, CompletedScheduled])
 class LocalDatabase extends _$LocalDatabase {
   // 싱글턴 인스턴스를 위한 정적 변수
   static final LocalDatabase _instance = LocalDatabase._internal();
@@ -51,19 +51,19 @@ class LocalDatabase extends _$LocalDatabase {
     final allSchedules =
         await (select(scheduled).join([
           leftOuterJoin(
-            completedPhotos,
-            completedPhotos.scheduledId.equalsExp(scheduled.id),
+            completedScheduled,
+            completedScheduled.scheduledId.equalsExp(scheduled.id),
           ),
         ])..where(
-          completedPhotos.id.isNull() |
-              completedPhotos.takenAt.isNotNull(), // takenAt이 존재할 때
+          completedScheduled.id.isNull() |
+          completedScheduled.takenAt.isNotNull(), // takenAt이 존재할 때
         )).get();
 
     final validSchedules =
         allSchedules
             .where((row) {
               final schedule = row.readTable(scheduled);
-              final photo = row.readTableOrNull(completedPhotos);
+              final photo = row.readTableOrNull(completedScheduled);
 
               // 만약 completedPhotos에 takenAt이 있다면 같은 날짜인지 확인
               if (photo != null) {
@@ -153,23 +153,23 @@ class LocalDatabase extends _$LocalDatabase {
   }
 
   //완료 일정 등록하기
-  Future<int> insertCompletePhoto(CompletedPhotosCompanion photo) {
-    return into(completedPhotos).insert(photo);
+  Future<int> insertCompleteSchedule(CompletedScheduledCompanion schedule ) {
+    return into(completedScheduled).insert(schedule);
   }
 
   //완료된 일정 모두 보여주기
-  Future<List<CompletedPhoto>> getAllCompletePhotos() {
-    return select(completedPhotos).get();
+  Future<List<CompletedScheduledData>> getAllCompletePhotos() {
+    return select(completedScheduled).get();
   }
 
   //해당 날짜에 완료된 일정들 출력하기
-  Future<List<CompletedPhoto>> getTodayPhotos(DateTime date) async {
+  Future<List<CompletedScheduledData>> getTodayPhotos(DateTime date) async {
     final selectDay = DateTime(date.year, date.month, date.day); // 선택 날짜 00:00
     final selectDayTomorrow = selectDay.add(
       Duration(days: 1),
     ); // 선택 날짜 다음날 00:00
 
-    return await (select(completedPhotos)
+    return await (select(completedScheduled)
           ..where(
             (tbl) => tbl.takenAt.isBetweenValues(selectDay, selectDayTomorrow),
           )
@@ -181,10 +181,10 @@ class LocalDatabase extends _$LocalDatabase {
 
   //달력 날짜에 표시할 이미지를 해당 일자에 촬영된 사진 중 랜덤하게 선택하기
   Future<Map<DateTime, String>> getRandomRearImagesByDate() async {
-    final allPhotos = await select(completedPhotos).get();
+    final allPhotos = await select(completedScheduled).get();
 
     // 날짜별로 묶기 (rearImgPath가 null이 아닌 것만 포함)
-    final Map<DateTime, List<CompletedPhoto>> photosByDate = {};
+    final Map<DateTime, List<CompletedScheduledData>> photosByDate = {};
 
     for (final photo in allPhotos) {
       if (photo.rearImgPath == null) continue; // null이면 건너뜀

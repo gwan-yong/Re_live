@@ -623,12 +623,12 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
   }
 }
 
-class $CompletedPhotosTable extends CompletedPhotos
-    with TableInfo<$CompletedPhotosTable, CompletedPhoto> {
+class $CompletedScheduledTable extends CompletedScheduled
+    with TableInfo<$CompletedScheduledTable, CompletedScheduledData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $CompletedPhotosTable(this.attachedDatabase, [this._alias]);
+  $CompletedScheduledTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -727,10 +727,10 @@ class $CompletedPhotosTable extends CompletedPhotos
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'completed_photos';
+  static const String $name = 'completed_scheduled';
   @override
   VerificationContext validateIntegrity(
-    Insertable<CompletedPhoto> instance, {
+    Insertable<CompletedScheduledData> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -794,9 +794,9 @@ class $CompletedPhotosTable extends CompletedPhotos
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  CompletedPhoto map(Map<String, dynamic> data, {String? tablePrefix}) {
+  CompletedScheduledData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return CompletedPhoto(
+    return CompletedScheduledData(
       id:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
@@ -832,12 +832,13 @@ class $CompletedPhotosTable extends CompletedPhotos
   }
 
   @override
-  $CompletedPhotosTable createAlias(String alias) {
-    return $CompletedPhotosTable(attachedDatabase, alias);
+  $CompletedScheduledTable createAlias(String alias) {
+    return $CompletedScheduledTable(attachedDatabase, alias);
   }
 }
 
-class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
+class CompletedScheduledData extends DataClass
+    implements Insertable<CompletedScheduledData> {
   final int id;
   final int? scheduledId;
   final String? frontImgPath;
@@ -845,7 +846,7 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
   final String? lateComment;
   final DateTime takenAt;
   final bool notDisplay;
-  const CompletedPhoto({
+  const CompletedScheduledData({
     required this.id,
     this.scheduledId,
     this.frontImgPath,
@@ -875,8 +876,8 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
     return map;
   }
 
-  CompletedPhotosCompanion toCompanion(bool nullToAbsent) {
-    return CompletedPhotosCompanion(
+  CompletedScheduledCompanion toCompanion(bool nullToAbsent) {
+    return CompletedScheduledCompanion(
       id: Value(id),
       scheduledId:
           scheduledId == null && nullToAbsent
@@ -899,12 +900,12 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
     );
   }
 
-  factory CompletedPhoto.fromJson(
+  factory CompletedScheduledData.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return CompletedPhoto(
+    return CompletedScheduledData(
       id: serializer.fromJson<int>(json['id']),
       scheduledId: serializer.fromJson<int?>(json['scheduledId']),
       frontImgPath: serializer.fromJson<String?>(json['frontImgPath']),
@@ -928,7 +929,7 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
     };
   }
 
-  CompletedPhoto copyWith({
+  CompletedScheduledData copyWith({
     int? id,
     Value<int?> scheduledId = const Value.absent(),
     Value<String?> frontImgPath = const Value.absent(),
@@ -936,7 +937,7 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
     Value<String?> lateComment = const Value.absent(),
     DateTime? takenAt,
     bool? notDisplay,
-  }) => CompletedPhoto(
+  }) => CompletedScheduledData(
     id: id ?? this.id,
     scheduledId: scheduledId.present ? scheduledId.value : this.scheduledId,
     frontImgPath: frontImgPath.present ? frontImgPath.value : this.frontImgPath,
@@ -945,8 +946,8 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
     takenAt: takenAt ?? this.takenAt,
     notDisplay: notDisplay ?? this.notDisplay,
   );
-  CompletedPhoto copyWithCompanion(CompletedPhotosCompanion data) {
-    return CompletedPhoto(
+  CompletedScheduledData copyWithCompanion(CompletedScheduledCompanion data) {
+    return CompletedScheduledData(
       id: data.id.present ? data.id.value : this.id,
       scheduledId:
           data.scheduledId.present ? data.scheduledId.value : this.scheduledId,
@@ -966,7 +967,7 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
 
   @override
   String toString() {
-    return (StringBuffer('CompletedPhoto(')
+    return (StringBuffer('CompletedScheduledData(')
           ..write('id: $id, ')
           ..write('scheduledId: $scheduledId, ')
           ..write('frontImgPath: $frontImgPath, ')
@@ -991,7 +992,7 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is CompletedPhoto &&
+      (other is CompletedScheduledData &&
           other.id == this.id &&
           other.scheduledId == this.scheduledId &&
           other.frontImgPath == this.frontImgPath &&
@@ -1001,7 +1002,8 @@ class CompletedPhoto extends DataClass implements Insertable<CompletedPhoto> {
           other.notDisplay == this.notDisplay);
 }
 
-class CompletedPhotosCompanion extends UpdateCompanion<CompletedPhoto> {
+class CompletedScheduledCompanion
+    extends UpdateCompanion<CompletedScheduledData> {
   final Value<int> id;
   final Value<int?> scheduledId;
   final Value<String?> frontImgPath;
@@ -1009,7 +1011,7 @@ class CompletedPhotosCompanion extends UpdateCompanion<CompletedPhoto> {
   final Value<String?> lateComment;
   final Value<DateTime> takenAt;
   final Value<bool> notDisplay;
-  const CompletedPhotosCompanion({
+  const CompletedScheduledCompanion({
     this.id = const Value.absent(),
     this.scheduledId = const Value.absent(),
     this.frontImgPath = const Value.absent(),
@@ -1018,7 +1020,7 @@ class CompletedPhotosCompanion extends UpdateCompanion<CompletedPhoto> {
     this.takenAt = const Value.absent(),
     this.notDisplay = const Value.absent(),
   });
-  CompletedPhotosCompanion.insert({
+  CompletedScheduledCompanion.insert({
     this.id = const Value.absent(),
     this.scheduledId = const Value.absent(),
     this.frontImgPath = const Value.absent(),
@@ -1027,7 +1029,7 @@ class CompletedPhotosCompanion extends UpdateCompanion<CompletedPhoto> {
     required DateTime takenAt,
     this.notDisplay = const Value.absent(),
   }) : takenAt = Value(takenAt);
-  static Insertable<CompletedPhoto> custom({
+  static Insertable<CompletedScheduledData> custom({
     Expression<int>? id,
     Expression<int>? scheduledId,
     Expression<String>? frontImgPath,
@@ -1047,7 +1049,7 @@ class CompletedPhotosCompanion extends UpdateCompanion<CompletedPhoto> {
     });
   }
 
-  CompletedPhotosCompanion copyWith({
+  CompletedScheduledCompanion copyWith({
     Value<int>? id,
     Value<int?>? scheduledId,
     Value<String?>? frontImgPath,
@@ -1056,7 +1058,7 @@ class CompletedPhotosCompanion extends UpdateCompanion<CompletedPhoto> {
     Value<DateTime>? takenAt,
     Value<bool>? notDisplay,
   }) {
-    return CompletedPhotosCompanion(
+    return CompletedScheduledCompanion(
       id: id ?? this.id,
       scheduledId: scheduledId ?? this.scheduledId,
       frontImgPath: frontImgPath ?? this.frontImgPath,
@@ -1096,7 +1098,7 @@ class CompletedPhotosCompanion extends UpdateCompanion<CompletedPhoto> {
 
   @override
   String toString() {
-    return (StringBuffer('CompletedPhotosCompanion(')
+    return (StringBuffer('CompletedScheduledCompanion(')
           ..write('id: $id, ')
           ..write('scheduledId: $scheduledId, ')
           ..write('frontImgPath: $frontImgPath, ')
@@ -1113,16 +1115,15 @@ abstract class _$LocalDatabase extends GeneratedDatabase {
   _$LocalDatabase(QueryExecutor e) : super(e);
   $LocalDatabaseManager get managers => $LocalDatabaseManager(this);
   late final $ScheduledTable scheduled = $ScheduledTable(this);
-  late final $CompletedPhotosTable completedPhotos = $CompletedPhotosTable(
-    this,
-  );
+  late final $CompletedScheduledTable completedScheduled =
+      $CompletedScheduledTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     scheduled,
-    completedPhotos,
+    completedScheduled,
   ];
 }
 
@@ -1428,8 +1429,8 @@ typedef $$ScheduledTableProcessedTableManager =
       ScheduledData,
       PrefetchHooks Function()
     >;
-typedef $$CompletedPhotosTableCreateCompanionBuilder =
-    CompletedPhotosCompanion Function({
+typedef $$CompletedScheduledTableCreateCompanionBuilder =
+    CompletedScheduledCompanion Function({
       Value<int> id,
       Value<int?> scheduledId,
       Value<String?> frontImgPath,
@@ -1438,8 +1439,8 @@ typedef $$CompletedPhotosTableCreateCompanionBuilder =
       required DateTime takenAt,
       Value<bool> notDisplay,
     });
-typedef $$CompletedPhotosTableUpdateCompanionBuilder =
-    CompletedPhotosCompanion Function({
+typedef $$CompletedScheduledTableUpdateCompanionBuilder =
+    CompletedScheduledCompanion Function({
       Value<int> id,
       Value<int?> scheduledId,
       Value<String?> frontImgPath,
@@ -1449,9 +1450,9 @@ typedef $$CompletedPhotosTableUpdateCompanionBuilder =
       Value<bool> notDisplay,
     });
 
-class $$CompletedPhotosTableFilterComposer
-    extends Composer<_$LocalDatabase, $CompletedPhotosTable> {
-  $$CompletedPhotosTableFilterComposer({
+class $$CompletedScheduledTableFilterComposer
+    extends Composer<_$LocalDatabase, $CompletedScheduledTable> {
+  $$CompletedScheduledTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1494,9 +1495,9 @@ class $$CompletedPhotosTableFilterComposer
   );
 }
 
-class $$CompletedPhotosTableOrderingComposer
-    extends Composer<_$LocalDatabase, $CompletedPhotosTable> {
-  $$CompletedPhotosTableOrderingComposer({
+class $$CompletedScheduledTableOrderingComposer
+    extends Composer<_$LocalDatabase, $CompletedScheduledTable> {
+  $$CompletedScheduledTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1539,9 +1540,9 @@ class $$CompletedPhotosTableOrderingComposer
   );
 }
 
-class $$CompletedPhotosTableAnnotationComposer
-    extends Composer<_$LocalDatabase, $CompletedPhotosTable> {
-  $$CompletedPhotosTableAnnotationComposer({
+class $$CompletedScheduledTableAnnotationComposer
+    extends Composer<_$LocalDatabase, $CompletedScheduledTable> {
+  $$CompletedScheduledTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1580,45 +1581,47 @@ class $$CompletedPhotosTableAnnotationComposer
   );
 }
 
-class $$CompletedPhotosTableTableManager
+class $$CompletedScheduledTableTableManager
     extends
         RootTableManager<
           _$LocalDatabase,
-          $CompletedPhotosTable,
-          CompletedPhoto,
-          $$CompletedPhotosTableFilterComposer,
-          $$CompletedPhotosTableOrderingComposer,
-          $$CompletedPhotosTableAnnotationComposer,
-          $$CompletedPhotosTableCreateCompanionBuilder,
-          $$CompletedPhotosTableUpdateCompanionBuilder,
+          $CompletedScheduledTable,
+          CompletedScheduledData,
+          $$CompletedScheduledTableFilterComposer,
+          $$CompletedScheduledTableOrderingComposer,
+          $$CompletedScheduledTableAnnotationComposer,
+          $$CompletedScheduledTableCreateCompanionBuilder,
+          $$CompletedScheduledTableUpdateCompanionBuilder,
           (
-            CompletedPhoto,
+            CompletedScheduledData,
             BaseReferences<
               _$LocalDatabase,
-              $CompletedPhotosTable,
-              CompletedPhoto
+              $CompletedScheduledTable,
+              CompletedScheduledData
             >,
           ),
-          CompletedPhoto,
+          CompletedScheduledData,
           PrefetchHooks Function()
         > {
-  $$CompletedPhotosTableTableManager(
+  $$CompletedScheduledTableTableManager(
     _$LocalDatabase db,
-    $CompletedPhotosTable table,
+    $CompletedScheduledTable table,
   ) : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer:
-              () =>
-                  $$CompletedPhotosTableFilterComposer($db: db, $table: table),
+              () => $$CompletedScheduledTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
           createOrderingComposer:
-              () => $$CompletedPhotosTableOrderingComposer(
+              () => $$CompletedScheduledTableOrderingComposer(
                 $db: db,
                 $table: table,
               ),
           createComputedFieldComposer:
-              () => $$CompletedPhotosTableAnnotationComposer(
+              () => $$CompletedScheduledTableAnnotationComposer(
                 $db: db,
                 $table: table,
               ),
@@ -1631,7 +1634,7 @@ class $$CompletedPhotosTableTableManager
                 Value<String?> lateComment = const Value.absent(),
                 Value<DateTime> takenAt = const Value.absent(),
                 Value<bool> notDisplay = const Value.absent(),
-              }) => CompletedPhotosCompanion(
+              }) => CompletedScheduledCompanion(
                 id: id,
                 scheduledId: scheduledId,
                 frontImgPath: frontImgPath,
@@ -1649,7 +1652,7 @@ class $$CompletedPhotosTableTableManager
                 Value<String?> lateComment = const Value.absent(),
                 required DateTime takenAt,
                 Value<bool> notDisplay = const Value.absent(),
-              }) => CompletedPhotosCompanion.insert(
+              }) => CompletedScheduledCompanion.insert(
                 id: id,
                 scheduledId: scheduledId,
                 frontImgPath: frontImgPath,
@@ -1673,21 +1676,25 @@ class $$CompletedPhotosTableTableManager
       );
 }
 
-typedef $$CompletedPhotosTableProcessedTableManager =
+typedef $$CompletedScheduledTableProcessedTableManager =
     ProcessedTableManager<
       _$LocalDatabase,
-      $CompletedPhotosTable,
-      CompletedPhoto,
-      $$CompletedPhotosTableFilterComposer,
-      $$CompletedPhotosTableOrderingComposer,
-      $$CompletedPhotosTableAnnotationComposer,
-      $$CompletedPhotosTableCreateCompanionBuilder,
-      $$CompletedPhotosTableUpdateCompanionBuilder,
+      $CompletedScheduledTable,
+      CompletedScheduledData,
+      $$CompletedScheduledTableFilterComposer,
+      $$CompletedScheduledTableOrderingComposer,
+      $$CompletedScheduledTableAnnotationComposer,
+      $$CompletedScheduledTableCreateCompanionBuilder,
+      $$CompletedScheduledTableUpdateCompanionBuilder,
       (
-        CompletedPhoto,
-        BaseReferences<_$LocalDatabase, $CompletedPhotosTable, CompletedPhoto>,
+        CompletedScheduledData,
+        BaseReferences<
+          _$LocalDatabase,
+          $CompletedScheduledTable,
+          CompletedScheduledData
+        >,
       ),
-      CompletedPhoto,
+      CompletedScheduledData,
       PrefetchHooks Function()
     >;
 
@@ -1696,6 +1703,6 @@ class $LocalDatabaseManager {
   $LocalDatabaseManager(this._db);
   $$ScheduledTableTableManager get scheduled =>
       $$ScheduledTableTableManager(_db, _db.scheduled);
-  $$CompletedPhotosTableTableManager get completedPhotos =>
-      $$CompletedPhotosTableTableManager(_db, _db.completedPhotos);
+  $$CompletedScheduledTableTableManager get completedScheduled =>
+      $$CompletedScheduledTableTableManager(_db, _db.completedScheduled);
 }

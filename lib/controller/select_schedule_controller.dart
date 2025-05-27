@@ -67,4 +67,19 @@ class SelectScheduleController extends GetxController {
     });
     repeatEndDate?.listen((value) => print('📌 repeatEndDate 변경됨: $value'));
   }
+
+  /// 컨트롤러 상태를 초기 상태로 되돌리는 메서드
+  void reset() {
+    id.value = 0;
+    title.value = '';
+    color.value = Colors.white;
+    selectDate.value = DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day);
+    startTime.value = TimeOfDay.now();
+    endUsed.value = false;
+    endTime.value = null;
+    repeatType.value = '없음';
+    repeatEndUsed.value = false;
+    repeatEndDate.value = null;
+    print('[SelectScheduleController] reset() 호출됨 - 상태 초기화 완료');
+  }
 }

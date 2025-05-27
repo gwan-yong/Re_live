@@ -55,13 +55,13 @@ Future<void> initNotification() async {
               MaterialPageRoute(
                 builder:
                     (_) => MissedEventJournal(
-                      scheduledId: id,
-                      title: title,
-                      startTime: startTime,
-                      endUsed: endUsed,
-                      endTime: endTime,
-                      color: Color(color),
-                    ),
+                  scheduledId: id,
+                  title: title,
+                  startTime: startTime,
+                  endUsed: endUsed,
+                  endTime: endTime,
+                  color: Color(color),
+                ),
               ),
             );
           }
@@ -73,10 +73,10 @@ Future<void> initNotification() async {
 
 //등록된 일정에 울리는 알림
 void showScheduledNotification(
-  int scheduledId,
-  DateTime scheduledDateTime,
-  String scheduledTitle,
-) async {
+    int scheduledId,
+    DateTime scheduledDateTime,
+    String scheduledTitle,
+    ) async {
   // 이미 같은 ID의 알림이 예약되어 있다면 중복 등록 방지
   final pending = await notifications.pendingNotificationRequests();
   final exists = pending.any((element) => element.id == scheduledId);
@@ -107,7 +107,7 @@ void showScheduledNotification(
     NotificationDetails(android: androidDetails, iOS: iosDetails),
     androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
+    UILocalNotificationDateInterpretation.absoluteTime,
     payload: 'type=scheduled&id=$scheduledId',
   );
   print('${scheduledTitle}알림등록됨');
@@ -115,14 +115,14 @@ void showScheduledNotification(
 
 //놓친 일정을 알리는 알림
 void showMissedScheduleNotification(
-  int scheduledId,
-  String scheduledTitle,
-  DateTime notificationTime,
-  String startTime,
-  bool endUsed,
-  String endTime,
-  int color,
-) async {
+    int scheduledId,
+    String scheduledTitle,
+    DateTime notificationTime,
+    String startTime,
+    bool endUsed,
+    String endTime,
+    int color,
+    ) async {
   // 이미 같은 ID의 알림이 예약되어 있다면 중복 등록 방지
   final pending = await notifications.pendingNotificationRequests();
   final exists = pending.any((element) => element.id == scheduledId);
@@ -131,12 +131,12 @@ void showMissedScheduleNotification(
 
   final payload = Uri.encodeFull(
     'type=missed'
-    '&id=$scheduledId'
-    '&title=$scheduledTitle'
-    '&startTime=$startTime'
-    '&endUsed=$endUsed'
-    '&endTime=$endTime'
-    '&color=$color',
+        '&id=$scheduledId'
+        '&title=$scheduledTitle'
+        '&startTime=$startTime'
+        '&endUsed=$endUsed'
+        '&endTime=$endTime'
+        '&color=$color',
   );
 
   // 알림 상세 설정
@@ -164,7 +164,7 @@ void showMissedScheduleNotification(
     NotificationDetails(android: androidDetails, iOS: iosDetails),
     androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
+    UILocalNotificationDateInterpretation.absoluteTime,
     payload: payload,
   );
   print('${scheduledTitle}놓친 알림등록됨');

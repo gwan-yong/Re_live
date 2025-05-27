@@ -5,7 +5,9 @@ import 'package:re_live/screen/home_screen.dart';
 
 import 'package:intl/date_symbol_data_local.dart';  // 로케일 데이터 초기화용
 import 'package:re_live/services/database_service.dart';
+import 'controller/db_complete_schedule_controller.dart';
 import 'controller/db_schedule_controller.dart';
+import 'controller/notification_controller.dart';
 import 'controller/select_schedule_controller.dart';
 import 'notification.dart';
 
@@ -14,9 +16,13 @@ void main() async {
   // 한국어 로케일 초기화
   await initializeDateFormatting('ko_KR', null);
   await initNotification();
+  Get.put(DatabaseService());
   Get.put(SelectScheduleController());
   Get.put(DbScheduleController());
-  Get.put(DatabaseService());
+  Get.put(DbCompleteScheduleController());
+  Get.put(NotificationController());
+
+
 
   runApp(
     MaterialApp(

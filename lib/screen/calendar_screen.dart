@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:re_live/widget/main_calendar.dart';
+import '../controller/select_schedule_controller.dart';
 import '../database/drift_database.dart';
 import '../widget/scheduled_event_list.dart';
 
 class CalendarScreen extends StatefulWidget {
-  CalendarScreen({Key? key}) : super(key: key);
+  CalendarScreen({super.key});
 
   @override
   _CalendarScreenState createState() => _CalendarScreenState();
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  final LocalDatabase database = LocalDatabase();
-  DateTime selectedDate = DateTime.now(); // 선택된 날짜 상태 관리
+
+  @override
+  void dispose() {
+    // 화면이 사라질 때 초기화 실행
+    SelectScheduleController.to.reset();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,20 +34,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
         bottom: false,
         child: Column(
           children: [
-            // MainCalendar에 onDateSelected 콜백 전달
-            MainCalendar(
-              onDateSelected: (DateTime newDate) {
-                setState(() {
-                  selectedDate = newDate; // 선택된 날짜 갱신
-                });
-              },
-            ),
-            // 선택된 날짜를 전달하여 이벤트 목록을 표시
+            MainCalendar(),
             Expanded(
               child: ScheduledEventList(
                 isScrollable: true,
-                database: database,
-                selectedDate: selectedDate, // 선택된 날짜 전달
               ),
             ),
           ],

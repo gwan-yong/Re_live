@@ -1,67 +1,51 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import '../database/drift_database.dart';
+import '../controller/db_complete_schedule_controller.dart';
+import 'package:get/get.dart';
+
 
 class CompletedEventList extends StatelessWidget {
   CompletedEventList({super.key});
 
-  DateTime get now => DateTime.now();
-
-  Future<List<CompletedPhoto>> _getTodayPhotos() async {
-    final db = LocalDatabase();
-    return await db.getTodayPhotos(now);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<CompletedPhoto>>(
-      future: _getTodayPhotos(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return SizedBox(
-              height: 220,
-              child: Center(child: CircularProgressIndicator()));
-        }
+    return Obx(() {
+      // GetX의 RxList를 직접 구독함
+      final photos = DbCompleteScheduleController.to.completeSchedules;
 
-        if (snapshot.hasError) {
-          return SizedBox(
-              height: 220,
-              child: Center(child: Text('오류 발생: ${snapshot.error}')));
-        }
+      // rearImgPath, frontImgPath가 모두 있는 사진만 필터링
+      final validPhotos = photos.where((photo) =>
+      photo.rearImgPath != null &&
+          photo.rearImgPath!.isNotEmpty &&
+          photo.frontImgPath != null &&
+          photo.frontImgPath!.isNotEmpty).toList();
 
-        final photos = snapshot.data ?? [];
-
-        if (photos.isEmpty) {
-          return SizedBox(
-            height: 220,
-            child: Center(
-              child: Text(
-                '완료한 일정이 없어요!\n오늘 하루도 힘내서 일정을 완료하세요!',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-            ),
-          );
-        }
-
+      if (validPhotos.isEmpty) {
         return SizedBox(
           height: 220,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              const SizedBox(width: 5),
-              ...photos
-                  .where((photo) => photo.rearImgPath != null || photo.frontImgPath != null)
-                  .map((photo) =>
-                  _ImageTile(photo.rearImgPath!, photo.frontImgPath!))
-                  .toList(),
-              const SizedBox(width: 5),
-            ],
+          child: Center(
+            child: Text(
+              '완료한 일정이 없어요!\n오늘 하루도 힘내서 일정을 완료하세요!',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
           ),
         );
-      },
-    );
+      }
+
+      return SizedBox(
+        height: 220,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
+            const SizedBox(width: 5),
+            ...validPhotos.map((photo) =>
+                _ImageTile(photo.rearImgPath!, photo.frontImgPath!)),
+            const SizedBox(width: 5),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _ImageTile(String rearimgPath, String frontimgPath) {

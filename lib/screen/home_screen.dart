@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:re_live/notification.dart';
 import 'package:re_live/screen/calendar_screen.dart';
 import 'package:re_live/widget/completed_event_list.dart';
 import 'package:re_live/widget/scheduled_event_list.dart';
@@ -7,7 +6,7 @@ import '../database/drift_database.dart';
 import '../widget/fab_menu_button.dart';
 
 class HomeScreen extends StatelessWidget{
-  HomeScreen({Key ? key}) : super(key: key);
+  HomeScreen({super.key});
   final LocalDatabase database = LocalDatabase();
   final DateTime selectedDate = DateTime.now();
 
@@ -44,8 +43,6 @@ class HomeScreen extends StatelessWidget{
                       ),
                       ScheduledEventList(
                           isScrollable: false,
-                          database: database,
-                        selectedDate: selectedDate,
                       ),
                     ],
                   ),
