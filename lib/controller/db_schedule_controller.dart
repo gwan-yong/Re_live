@@ -13,7 +13,6 @@ class DbScheduleController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
     // 날짜가 바뀔 때마다 자동으로 일정 로딩
     ever(selectDate, (_) {
       loadSchedules();
@@ -33,12 +32,24 @@ class DbScheduleController extends GetxController {
     await db.insertSchedule(schedule);
     await loadSchedules();
     await NotificationController.to.refresh();
+    print("${schedule.title} 일정이 추가됨");
   }
 
   Future<void> deleteSchedule(int id) async {
     final db = DatabaseService.to.db;
     await db.deleteSchedule(id);
     await NotificationController.to.refresh();
+    print("일정 id ${id} 가 삭제됨");
+  }
+
+  Future<ScheduledData?> searchSchedule(int id) async {
+    await loadSchedules();
+    try {
+      return schedules.firstWhere((schedule) => schedule.id == id);
+    } catch (e) {
+      // 해당 id를 가진 schedule이 없을 경우 null 반환
+      return null;
+    }
   }
 
   Future<ScheduledData?> getCurrentRunning() async {

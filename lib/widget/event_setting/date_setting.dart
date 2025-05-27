@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:re_live/controller/select_schedule_controller.dart';
 import 'package:re_live/widget/event_setting/date_picker_box.dart';
 import '../../theme/colors.dart';

@@ -32,6 +32,23 @@ class _RepeatSetting extends State<RepeatSetting> {
   };
 
   @override
+  void initState() {
+    super.initState();
+
+    // 🔹 반복 종료 사용 여부 초기화
+    repeatDayUsed = SelectScheduleController.to.repeatEndUsed.value;
+
+    // 🔹 반복 종료 날짜 초기화
+    repeatEndDate = SelectScheduleController.to.repeatEndDate.value;
+
+    // 🔹 반복 유형 초기화
+    final repeatTypeLabel = SelectScheduleController.to.repeatType.value;
+    final entry = typeLabels.entries
+        .firstWhere((entry) => entry.value == repeatTypeLabel, orElse: () => const MapEntry(RepeatType.none, '없음'));
+    selectedType = entry.key;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       height: 233,
@@ -145,6 +162,7 @@ class _RepeatSetting extends State<RepeatSetting> {
                   const SizedBox(height: 10),
                   if (repeatDayUsed)
                     DatePickerBox(
+                      initialDate: repeatEndDate,
                       withTime: false,
                       onDateTimeChanged: (DateTime? date, TimeOfDay? _) {
                         setState(() {

@@ -133,6 +133,7 @@ class PhotosUploadScreen extends StatelessWidget {
 
                     // CompletePhotos 테이블에 데이터 추가
                     await DbCompleteScheduleController.to.addCompleteSchedule(newCompleteSchedule);
+                    await DbScheduleController.to.loadSchedules();
 
                     if (currentSchedule != null) {
                       await notifications.cancel(currentSchedule.id + 10000); // 해당 ID의 놓친 일정 알림 삭제
