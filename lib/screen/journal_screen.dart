@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:re_live/theme/colors.dart';
 import 'package:re_live/widget/missed_event_list.dart';
+import '../controller/db_journal_controller.dart';
+import '../database/drift_database.dart';
 import '../widget/completed_event_list.dart';
+import 'package:drift/drift.dart' as drift;
 import 'home_screen.dart';
 
 class JournalScreen extends StatelessWidget{
-  const JournalScreen({super.key});
+  JournalScreen({super.key});
+
+  String comment = '';
 
   Widget build(BuildContext context){
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -44,6 +50,9 @@ class JournalScreen extends StatelessWidget{
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: TextField(
                     onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
+                    onChanged: (value) {
+                      comment = value;
+                    },
                     minLines: 3,
                     maxLines: null,
                     style: TextStyle(
@@ -75,7 +84,12 @@ class JournalScreen extends StatelessWidget{
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: GestureDetector(
-                    onTap: () {
+                    onTap: () async{
+                      final newJournal = JournalCompanion(
+                        date : drift.Value(DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day)),
+                        comment : drift.Value(comment),
+                      );
+                      await DbJournalController.to.addJournal(newJournal);
                       Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => HomeScreen())

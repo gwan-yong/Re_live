@@ -6,10 +6,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:re_live/model/scheduled.dart';
 import '../model/completed_scheduled.dart';
+import '../model/journal.dart';
 
 part 'drift_database.g.dart';
 
-@DriftDatabase(tables: [Scheduled, CompletedScheduled])
+@DriftDatabase(tables: [Scheduled, CompletedScheduled, Journal])
 class LocalDatabase extends _$LocalDatabase {
   // 싱글턴 인스턴스를 위한 정적 변수
   static final LocalDatabase _instance = LocalDatabase._internal();
@@ -212,6 +213,19 @@ class LocalDatabase extends _$LocalDatabase {
     return result;
   }
 
+  //일기 등록
+  Future<int> insertJournal(JournalCompanion value) {
+    return into(journal).insert(value);
+  }
+
+  Future<JournalData?> searchJournal(DateTime targetDate) {
+    final start = DateTime(targetDate.year, targetDate.month, targetDate.day);
+    final end = start.add(const Duration(days: 1));
+
+    return (select(journal)
+      ..where((j) => j.date.isBetweenValues(start, end)))
+        .getSingleOrNull();
+  }
 
 }
 

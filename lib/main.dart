@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:re_live/controller/db_journal_controller.dart';
 import 'package:re_live/screen/home_screen.dart';
 
 import 'package:intl/date_symbol_data_local.dart';  // 로케일 데이터 초기화용
@@ -20,6 +21,7 @@ void main() async {
   Get.put(SelectScheduleController());
   Get.put(DbScheduleController());
   Get.put(DbCompleteScheduleController());
+  Get.put(DbJournalController());
   Get.put(NotificationController());
 
 

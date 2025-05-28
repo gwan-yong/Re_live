@@ -43,7 +43,7 @@ class ScheduleTile extends StatelessWidget {
               children: [
                 Text(_formatTime(startTime)),
                 if (endUsed) Text(" ~ ${_formatTime(endTime)}"),
-                if (lateCommet != null) Text('사유 : $lateCommet'),
+                if (lateCommet != null) Text(' 사유 : $lateCommet'),
               ],
             ),
           ],

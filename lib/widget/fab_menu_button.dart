@@ -67,7 +67,7 @@ class _FAButtonMenuState extends State<FAButtonMenu>
               label: '글쓰기',
               action: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const JournalScreen()),
+                MaterialPageRoute(builder: (context) => JournalScreen()),
               ),
             ),
             FABItem(

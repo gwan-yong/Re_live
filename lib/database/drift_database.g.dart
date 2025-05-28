@@ -1111,12 +1111,224 @@ class CompletedScheduledCompanion
   }
 }
 
+class $JournalTable extends Journal with TableInfo<$JournalTable, JournalData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $JournalTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _commentMeta = const VerificationMeta(
+    'comment',
+  );
+  @override
+  late final GeneratedColumn<String> comment = GeneratedColumn<String>(
+    'comment',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [date, comment];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'journal';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<JournalData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('comment')) {
+      context.handle(
+        _commentMeta,
+        comment.isAcceptableOrUnknown(data['comment']!, _commentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_commentMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  JournalData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return JournalData(
+      date:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}date'],
+          )!,
+      comment:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}comment'],
+          )!,
+    );
+  }
+
+  @override
+  $JournalTable createAlias(String alias) {
+    return $JournalTable(attachedDatabase, alias);
+  }
+}
+
+class JournalData extends DataClass implements Insertable<JournalData> {
+  final DateTime date;
+  final String comment;
+  const JournalData({required this.date, required this.comment});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['date'] = Variable<DateTime>(date);
+    map['comment'] = Variable<String>(comment);
+    return map;
+  }
+
+  JournalCompanion toCompanion(bool nullToAbsent) {
+    return JournalCompanion(date: Value(date), comment: Value(comment));
+  }
+
+  factory JournalData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return JournalData(
+      date: serializer.fromJson<DateTime>(json['date']),
+      comment: serializer.fromJson<String>(json['comment']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'date': serializer.toJson<DateTime>(date),
+      'comment': serializer.toJson<String>(comment),
+    };
+  }
+
+  JournalData copyWith({DateTime? date, String? comment}) =>
+      JournalData(date: date ?? this.date, comment: comment ?? this.comment);
+  JournalData copyWithCompanion(JournalCompanion data) {
+    return JournalData(
+      date: data.date.present ? data.date.value : this.date,
+      comment: data.comment.present ? data.comment.value : this.comment,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JournalData(')
+          ..write('date: $date, ')
+          ..write('comment: $comment')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(date, comment);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is JournalData &&
+          other.date == this.date &&
+          other.comment == this.comment);
+}
+
+class JournalCompanion extends UpdateCompanion<JournalData> {
+  final Value<DateTime> date;
+  final Value<String> comment;
+  final Value<int> rowid;
+  const JournalCompanion({
+    this.date = const Value.absent(),
+    this.comment = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  JournalCompanion.insert({
+    required DateTime date,
+    required String comment,
+    this.rowid = const Value.absent(),
+  }) : date = Value(date),
+       comment = Value(comment);
+  static Insertable<JournalData> custom({
+    Expression<DateTime>? date,
+    Expression<String>? comment,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (date != null) 'date': date,
+      if (comment != null) 'comment': comment,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  JournalCompanion copyWith({
+    Value<DateTime>? date,
+    Value<String>? comment,
+    Value<int>? rowid,
+  }) {
+    return JournalCompanion(
+      date: date ?? this.date,
+      comment: comment ?? this.comment,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (comment.present) {
+      map['comment'] = Variable<String>(comment.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JournalCompanion(')
+          ..write('date: $date, ')
+          ..write('comment: $comment, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$LocalDatabase extends GeneratedDatabase {
   _$LocalDatabase(QueryExecutor e) : super(e);
   $LocalDatabaseManager get managers => $LocalDatabaseManager(this);
   late final $ScheduledTable scheduled = $ScheduledTable(this);
   late final $CompletedScheduledTable completedScheduled =
       $CompletedScheduledTable(this);
+  late final $JournalTable journal = $JournalTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1124,6 +1336,7 @@ abstract class _$LocalDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     scheduled,
     completedScheduled,
+    journal,
   ];
 }
 
@@ -1697,6 +1910,153 @@ typedef $$CompletedScheduledTableProcessedTableManager =
       CompletedScheduledData,
       PrefetchHooks Function()
     >;
+typedef $$JournalTableCreateCompanionBuilder =
+    JournalCompanion Function({
+      required DateTime date,
+      required String comment,
+      Value<int> rowid,
+    });
+typedef $$JournalTableUpdateCompanionBuilder =
+    JournalCompanion Function({
+      Value<DateTime> date,
+      Value<String> comment,
+      Value<int> rowid,
+    });
+
+class $$JournalTableFilterComposer
+    extends Composer<_$LocalDatabase, $JournalTable> {
+  $$JournalTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get comment => $composableBuilder(
+    column: $table.comment,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$JournalTableOrderingComposer
+    extends Composer<_$LocalDatabase, $JournalTable> {
+  $$JournalTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get comment => $composableBuilder(
+    column: $table.comment,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$JournalTableAnnotationComposer
+    extends Composer<_$LocalDatabase, $JournalTable> {
+  $$JournalTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get comment =>
+      $composableBuilder(column: $table.comment, builder: (column) => column);
+}
+
+class $$JournalTableTableManager
+    extends
+        RootTableManager<
+          _$LocalDatabase,
+          $JournalTable,
+          JournalData,
+          $$JournalTableFilterComposer,
+          $$JournalTableOrderingComposer,
+          $$JournalTableAnnotationComposer,
+          $$JournalTableCreateCompanionBuilder,
+          $$JournalTableUpdateCompanionBuilder,
+          (
+            JournalData,
+            BaseReferences<_$LocalDatabase, $JournalTable, JournalData>,
+          ),
+          JournalData,
+          PrefetchHooks Function()
+        > {
+  $$JournalTableTableManager(_$LocalDatabase db, $JournalTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$JournalTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $$JournalTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $$JournalTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<DateTime> date = const Value.absent(),
+                Value<String> comment = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) =>
+                  JournalCompanion(date: date, comment: comment, rowid: rowid),
+          createCompanionCallback:
+              ({
+                required DateTime date,
+                required String comment,
+                Value<int> rowid = const Value.absent(),
+              }) => JournalCompanion.insert(
+                date: date,
+                comment: comment,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$JournalTableProcessedTableManager =
+    ProcessedTableManager<
+      _$LocalDatabase,
+      $JournalTable,
+      JournalData,
+      $$JournalTableFilterComposer,
+      $$JournalTableOrderingComposer,
+      $$JournalTableAnnotationComposer,
+      $$JournalTableCreateCompanionBuilder,
+      $$JournalTableUpdateCompanionBuilder,
+      (
+        JournalData,
+        BaseReferences<_$LocalDatabase, $JournalTable, JournalData>,
+      ),
+      JournalData,
+      PrefetchHooks Function()
+    >;
 
 class $LocalDatabaseManager {
   final _$LocalDatabase _db;
@@ -1705,4 +2065,6 @@ class $LocalDatabaseManager {
       $$ScheduledTableTableManager(_db, _db.scheduled);
   $$CompletedScheduledTableTableManager get completedScheduled =>
       $$CompletedScheduledTableTableManager(_db, _db.completedScheduled);
+  $$JournalTableTableManager get journal =>
+      $$JournalTableTableManager(_db, _db.journal);
 }
