@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:re_live/controller/db_complete_schedule_controller.dart';
-import 'package:re_live/controller/db_schedule_controller.dart';
+import 'package:re_live/controller/db_upcoming_schedule_controller.dart';
 import '../database/drift_database.dart';
 import '../notification.dart';
 import '../theme/colors.dart';
@@ -53,8 +53,8 @@ class PhotosUploadScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return FutureBuilder<ScheduledData?>(
-      future: DbScheduleController.to.getCurrentRunning(),
+    return FutureBuilder<UpcomingScheduledData?>(
+      future: DbUpcomingScheduleController.to.getCurrentRunning(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -122,7 +122,7 @@ class PhotosUploadScreen extends StatelessWidget {
 
 
                     // _getCurrentRunningSchedule에서 scheduledId 가져오기
-                    final currentSchedule = await DbScheduleController.to.getCurrentRunning();
+                    final currentSchedule = await DbUpcomingScheduleController.to.getCurrentRunning();
 
                     final newCompleteSchedule = (CompletedScheduledCompanion(
                       scheduledId: drift.Value(currentSchedule?.id),

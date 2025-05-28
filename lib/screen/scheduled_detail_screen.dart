@@ -1,24 +1,25 @@
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:get/get.dart';
 import 'package:re_live/widget/event_setting/date_setting.dart';
 import 'package:re_live/widget/event_setting/repeat_setting.dart';
 import '../controller/db_complete_schedule_controller.dart';
-import '../controller/db_schedule_controller.dart';
+import '../controller/db_upcoming_schedule_controller.dart';
 import '../controller/select_schedule_controller.dart';
 import '../database/drift_database.dart';
 import '../widget/event_setting/event_title.dart';
-import 'package:drift/drift.dart' as drift;
+
 import 'home_screen.dart';
 
-class EventScreen extends StatefulWidget {
-  const EventScreen({super.key});
+class ScheduledDetailScreen extends StatefulWidget {
+  const ScheduledDetailScreen({super.key});
 
   @override
-  State<EventScreen> createState() => _EventScreenState();
+  State<ScheduledDetailScreen> createState() => _ScheduledDetailScreenState();
 }
 
-class _EventScreenState extends State<EventScreen> {
+class _ScheduledDetailScreenState extends State<ScheduledDetailScreen> {
   final selectId = SelectScheduleController.to.id.value;
   bool _showDeleteOptions = false;
   bool _showUpdateOptions = false;
@@ -55,14 +56,14 @@ class _EventScreenState extends State<EventScreen> {
 
   Future<void> _handleFullDelete() async {
     final id = SelectScheduleController.to.id.value;
-    await DbScheduleController.to.deleteSchedule(id);
+    await DbUpcomingScheduleController.to.deleteSchedule(id);
     _navigateHome();
   }
 
   Future<void> _handleSingleUpdate() async {
     _handleSingleDelete();
     final sc = SelectScheduleController.to;
-    final newSchedule = ScheduledCompanion(
+    final newSchedule = UpcomingScheduledCompanion(
       title: drift.Value(sc.title.value),
       color: drift.Value(sc.color.value.value),
       date: drift.Value(sc.selectDate.value),
@@ -73,13 +74,13 @@ class _EventScreenState extends State<EventScreen> {
           ? const drift.Value.absent()
           : drift.Value(timeOfDayToInt(sc.endTime.value!)),
     );
-    await DbScheduleController.to.addSchedule(newSchedule);
+    await DbUpcomingScheduleController.to.addSchedule(newSchedule);
     _navigateHome();
   }
 
   Future<void> _handleFullUpdate() async {
     final sc = SelectScheduleController.to;
-    final newSchedule = ScheduledCompanion(
+    final newSchedule = UpcomingScheduledCompanion(
       title: drift.Value(sc.title.value),
       color: drift.Value(sc.color.value.value),
       date: drift.Value(sc.selectDate.value),
@@ -93,7 +94,7 @@ class _EventScreenState extends State<EventScreen> {
       repeatEndUsed: drift.Value(sc.repeatEndUsed.value),
       repeatEndDate: drift.Value(sc.repeatEndDate.value),
     );
-    await DbScheduleController.to.updateSchedule(sc.id.value,newSchedule);
+    await DbUpcomingScheduleController.to.updateSchedule(sc.id.value,newSchedule);
     _navigateHome();
   }
 
@@ -160,11 +161,11 @@ class _EventScreenState extends State<EventScreen> {
     return GestureDetector(
       onTap: () async {
         if (selectId >= 1) {
-          final schedule = await DbScheduleController.to.searchSchedule(
+          final schedule = await DbUpcomingScheduleController.to.searchSchedule(
             selectId,
           );
           if (schedule?.repeatType == "없음") {
-            await DbScheduleController.to.deleteSchedule(schedule!.id);
+            await DbUpcomingScheduleController.to.deleteSchedule(schedule!.id);
             _navigateHome();
           } else {
             setState(() => _showDeleteOptions = !_showDeleteOptions);
@@ -200,7 +201,7 @@ class _EventScreenState extends State<EventScreen> {
       child: GestureDetector(
         onTap: () async {
           final sc = SelectScheduleController.to;
-          final newSchedule = ScheduledCompanion(
+          final newSchedule = UpcomingScheduledCompanion(
             title: drift.Value(sc.title.value),
             color: drift.Value(sc.color.value.value),
             date: drift.Value(sc.selectDate.value),
@@ -221,7 +222,7 @@ class _EventScreenState extends State<EventScreen> {
           }
           else{
             //기존 일정이 없고 새로운 일정이기 떄문에 일정 추가
-            await DbScheduleController.to.addSchedule(newSchedule);
+            await DbUpcomingScheduleController.to.addSchedule(newSchedule);
             _navigateHome();
           }
         },

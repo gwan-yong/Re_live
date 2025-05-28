@@ -9,7 +9,7 @@ import '../notification.dart';
 import '../theme/colors.dart';
 import 'home_screen.dart';
 
-class MissedEventJournal extends StatefulWidget {
+class MissedScheduledScreen extends StatefulWidget {
   final int scheduledId;
   final String title;
   final String startTime;
@@ -17,7 +17,7 @@ class MissedEventJournal extends StatefulWidget {
   final String endTime;
   final Color color;
 
-  const MissedEventJournal({
+  const MissedScheduledScreen({
     Key? key,
     required this.scheduledId,
     required this.title,
@@ -28,10 +28,10 @@ class MissedEventJournal extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<MissedEventJournal> createState() => _MissedEventJournalState();
+  State<MissedScheduledScreen> createState() => _MissedScheduledScreenState();
 }
 
-class _MissedEventJournalState extends State<MissedEventJournal> {
+class _MissedScheduledScreenState extends State<MissedScheduledScreen> {
   String rearImagePath = '';
   String frontImagePath = '';
   final TextEditingController _lateCommentController = TextEditingController();

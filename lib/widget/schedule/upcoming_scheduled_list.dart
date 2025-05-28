@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:re_live/widget/schedule_tile.dart';
-import '../controller/db_schedule_controller.dart';
-import '../controller/notification_controller.dart';
-import '../controller/select_schedule_controller.dart';
-import '../screen/event_screen.dart';
+import 'package:re_live/widget/schedule/schedule_tile.dart';
+import '../../controller/db_upcoming_schedule_controller.dart';
+import '../../controller/notification_controller.dart';
+import '../../controller/select_schedule_controller.dart';
+import '../../screen/scheduled_detail_screen.dart';
 
-class ScheduledEventList extends StatelessWidget {
+class UpcomingScheduledList extends StatelessWidget {
   final bool isScrollable;
   final DateTime selectedDate = SelectScheduleController.to.selectDate.value;
 
-  ScheduledEventList({this.isScrollable = true}) {
+  UpcomingScheduledList({this.isScrollable = true}) {
     NotificationController.to.loadTodaySchedules();
   }
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final schedules = DbScheduleController.to.schedules;
+      final schedules = DbUpcomingScheduleController.to.upcomingSchedules;
 
       if (schedules.isEmpty) {
         return const Center(child: Text('등록된 일정이 없습니다.'));
@@ -63,7 +63,7 @@ class ScheduledEventList extends StatelessWidget {
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => EventScreen()),
+      MaterialPageRoute(builder: (context) => ScheduledDetailScreen()),
     );
   }
 

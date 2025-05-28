@@ -3,12 +3,12 @@
 part of 'drift_database.dart';
 
 // ignore_for_file: type=lint
-class $ScheduledTable extends Scheduled
-    with TableInfo<$ScheduledTable, ScheduledData> {
+class $UpcomingScheduledTable extends UpcomingScheduled
+    with TableInfo<$UpcomingScheduledTable, UpcomingScheduledData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ScheduledTable(this.attachedDatabase, [this._alias]);
+  $UpcomingScheduledTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -141,10 +141,10 @@ class $ScheduledTable extends Scheduled
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'scheduled';
+  static const String $name = 'upcoming_scheduled';
   @override
   VerificationContext validateIntegrity(
-    Insertable<ScheduledData> instance, {
+    Insertable<UpcomingScheduledData> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -226,9 +226,9 @@ class $ScheduledTable extends Scheduled
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  ScheduledData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  UpcomingScheduledData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ScheduledData(
+    return UpcomingScheduledData(
       id:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
@@ -280,12 +280,13 @@ class $ScheduledTable extends Scheduled
   }
 
   @override
-  $ScheduledTable createAlias(String alias) {
-    return $ScheduledTable(attachedDatabase, alias);
+  $UpcomingScheduledTable createAlias(String alias) {
+    return $UpcomingScheduledTable(attachedDatabase, alias);
   }
 }
 
-class ScheduledData extends DataClass implements Insertable<ScheduledData> {
+class UpcomingScheduledData extends DataClass
+    implements Insertable<UpcomingScheduledData> {
   final int id;
   final String title;
   final int? color;
@@ -296,7 +297,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
   final String repeatType;
   final bool repeatEndUsed;
   final DateTime? repeatEndDate;
-  const ScheduledData({
+  const UpcomingScheduledData({
     required this.id,
     required this.title,
     this.color,
@@ -330,8 +331,8 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     return map;
   }
 
-  ScheduledCompanion toCompanion(bool nullToAbsent) {
-    return ScheduledCompanion(
+  UpcomingScheduledCompanion toCompanion(bool nullToAbsent) {
+    return UpcomingScheduledCompanion(
       id: Value(id),
       title: Value(title),
       color:
@@ -352,12 +353,12 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     );
   }
 
-  factory ScheduledData.fromJson(
+  factory UpcomingScheduledData.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ScheduledData(
+    return UpcomingScheduledData(
       id: serializer.fromJson<int>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       color: serializer.fromJson<int?>(json['color']),
@@ -387,7 +388,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     };
   }
 
-  ScheduledData copyWith({
+  UpcomingScheduledData copyWith({
     int? id,
     String? title,
     Value<int?> color = const Value.absent(),
@@ -398,7 +399,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     String? repeatType,
     bool? repeatEndUsed,
     Value<DateTime?> repeatEndDate = const Value.absent(),
-  }) => ScheduledData(
+  }) => UpcomingScheduledData(
     id: id ?? this.id,
     title: title ?? this.title,
     color: color.present ? color.value : this.color,
@@ -411,8 +412,8 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
     repeatEndDate:
         repeatEndDate.present ? repeatEndDate.value : this.repeatEndDate,
   );
-  ScheduledData copyWithCompanion(ScheduledCompanion data) {
-    return ScheduledData(
+  UpcomingScheduledData copyWithCompanion(UpcomingScheduledCompanion data) {
+    return UpcomingScheduledData(
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       color: data.color.present ? data.color.value : this.color,
@@ -435,7 +436,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
 
   @override
   String toString() {
-    return (StringBuffer('ScheduledData(')
+    return (StringBuffer('UpcomingScheduledData(')
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('color: $color, ')
@@ -466,7 +467,7 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is ScheduledData &&
+      (other is UpcomingScheduledData &&
           other.id == this.id &&
           other.title == this.title &&
           other.color == this.color &&
@@ -479,7 +480,8 @@ class ScheduledData extends DataClass implements Insertable<ScheduledData> {
           other.repeatEndDate == this.repeatEndDate);
 }
 
-class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
+class UpcomingScheduledCompanion
+    extends UpdateCompanion<UpcomingScheduledData> {
   final Value<int> id;
   final Value<String> title;
   final Value<int?> color;
@@ -490,7 +492,7 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
   final Value<String> repeatType;
   final Value<bool> repeatEndUsed;
   final Value<DateTime?> repeatEndDate;
-  const ScheduledCompanion({
+  const UpcomingScheduledCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.color = const Value.absent(),
@@ -502,7 +504,7 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     this.repeatEndUsed = const Value.absent(),
     this.repeatEndDate = const Value.absent(),
   });
-  ScheduledCompanion.insert({
+  UpcomingScheduledCompanion.insert({
     this.id = const Value.absent(),
     required String title,
     this.color = const Value.absent(),
@@ -517,7 +519,7 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
        date = Value(date),
        startTime = Value(startTime),
        endUsed = Value(endUsed);
-  static Insertable<ScheduledData> custom({
+  static Insertable<UpcomingScheduledData> custom({
     Expression<int>? id,
     Expression<String>? title,
     Expression<int>? color,
@@ -543,7 +545,7 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     });
   }
 
-  ScheduledCompanion copyWith({
+  UpcomingScheduledCompanion copyWith({
     Value<int>? id,
     Value<String>? title,
     Value<int?>? color,
@@ -555,7 +557,7 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
     Value<bool>? repeatEndUsed,
     Value<DateTime?>? repeatEndDate,
   }) {
-    return ScheduledCompanion(
+    return UpcomingScheduledCompanion(
       id: id ?? this.id,
       title: title ?? this.title,
       color: color ?? this.color,
@@ -607,7 +609,7 @@ class ScheduledCompanion extends UpdateCompanion<ScheduledData> {
 
   @override
   String toString() {
-    return (StringBuffer('ScheduledCompanion(')
+    return (StringBuffer('UpcomingScheduledCompanion(')
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('color: $color, ')
@@ -1325,7 +1327,8 @@ class JournalCompanion extends UpdateCompanion<JournalData> {
 abstract class _$LocalDatabase extends GeneratedDatabase {
   _$LocalDatabase(QueryExecutor e) : super(e);
   $LocalDatabaseManager get managers => $LocalDatabaseManager(this);
-  late final $ScheduledTable scheduled = $ScheduledTable(this);
+  late final $UpcomingScheduledTable upcomingScheduled =
+      $UpcomingScheduledTable(this);
   late final $CompletedScheduledTable completedScheduled =
       $CompletedScheduledTable(this);
   late final $JournalTable journal = $JournalTable(this);
@@ -1334,14 +1337,14 @@ abstract class _$LocalDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-    scheduled,
+    upcomingScheduled,
     completedScheduled,
     journal,
   ];
 }
 
-typedef $$ScheduledTableCreateCompanionBuilder =
-    ScheduledCompanion Function({
+typedef $$UpcomingScheduledTableCreateCompanionBuilder =
+    UpcomingScheduledCompanion Function({
       Value<int> id,
       required String title,
       Value<int?> color,
@@ -1353,8 +1356,8 @@ typedef $$ScheduledTableCreateCompanionBuilder =
       Value<bool> repeatEndUsed,
       Value<DateTime?> repeatEndDate,
     });
-typedef $$ScheduledTableUpdateCompanionBuilder =
-    ScheduledCompanion Function({
+typedef $$UpcomingScheduledTableUpdateCompanionBuilder =
+    UpcomingScheduledCompanion Function({
       Value<int> id,
       Value<String> title,
       Value<int?> color,
@@ -1367,9 +1370,9 @@ typedef $$ScheduledTableUpdateCompanionBuilder =
       Value<DateTime?> repeatEndDate,
     });
 
-class $$ScheduledTableFilterComposer
-    extends Composer<_$LocalDatabase, $ScheduledTable> {
-  $$ScheduledTableFilterComposer({
+class $$UpcomingScheduledTableFilterComposer
+    extends Composer<_$LocalDatabase, $UpcomingScheduledTable> {
+  $$UpcomingScheduledTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1427,9 +1430,9 @@ class $$ScheduledTableFilterComposer
   );
 }
 
-class $$ScheduledTableOrderingComposer
-    extends Composer<_$LocalDatabase, $ScheduledTable> {
-  $$ScheduledTableOrderingComposer({
+class $$UpcomingScheduledTableOrderingComposer
+    extends Composer<_$LocalDatabase, $UpcomingScheduledTable> {
+  $$UpcomingScheduledTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1487,9 +1490,9 @@ class $$ScheduledTableOrderingComposer
   );
 }
 
-class $$ScheduledTableAnnotationComposer
-    extends Composer<_$LocalDatabase, $ScheduledTable> {
-  $$ScheduledTableAnnotationComposer({
+class $$UpcomingScheduledTableAnnotationComposer
+    extends Composer<_$LocalDatabase, $UpcomingScheduledTable> {
+  $$UpcomingScheduledTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1533,35 +1536,50 @@ class $$ScheduledTableAnnotationComposer
   );
 }
 
-class $$ScheduledTableTableManager
+class $$UpcomingScheduledTableTableManager
     extends
         RootTableManager<
           _$LocalDatabase,
-          $ScheduledTable,
-          ScheduledData,
-          $$ScheduledTableFilterComposer,
-          $$ScheduledTableOrderingComposer,
-          $$ScheduledTableAnnotationComposer,
-          $$ScheduledTableCreateCompanionBuilder,
-          $$ScheduledTableUpdateCompanionBuilder,
+          $UpcomingScheduledTable,
+          UpcomingScheduledData,
+          $$UpcomingScheduledTableFilterComposer,
+          $$UpcomingScheduledTableOrderingComposer,
+          $$UpcomingScheduledTableAnnotationComposer,
+          $$UpcomingScheduledTableCreateCompanionBuilder,
+          $$UpcomingScheduledTableUpdateCompanionBuilder,
           (
-            ScheduledData,
-            BaseReferences<_$LocalDatabase, $ScheduledTable, ScheduledData>,
+            UpcomingScheduledData,
+            BaseReferences<
+              _$LocalDatabase,
+              $UpcomingScheduledTable,
+              UpcomingScheduledData
+            >,
           ),
-          ScheduledData,
+          UpcomingScheduledData,
           PrefetchHooks Function()
         > {
-  $$ScheduledTableTableManager(_$LocalDatabase db, $ScheduledTable table)
-    : super(
+  $$UpcomingScheduledTableTableManager(
+    _$LocalDatabase db,
+    $UpcomingScheduledTable table,
+  ) : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer:
-              () => $$ScheduledTableFilterComposer($db: db, $table: table),
+              () => $$UpcomingScheduledTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
           createOrderingComposer:
-              () => $$ScheduledTableOrderingComposer($db: db, $table: table),
+              () => $$UpcomingScheduledTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
           createComputedFieldComposer:
-              () => $$ScheduledTableAnnotationComposer($db: db, $table: table),
+              () => $$UpcomingScheduledTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -1574,7 +1592,7 @@ class $$ScheduledTableTableManager
                 Value<String> repeatType = const Value.absent(),
                 Value<bool> repeatEndUsed = const Value.absent(),
                 Value<DateTime?> repeatEndDate = const Value.absent(),
-              }) => ScheduledCompanion(
+              }) => UpcomingScheduledCompanion(
                 id: id,
                 title: title,
                 color: color,
@@ -1598,7 +1616,7 @@ class $$ScheduledTableTableManager
                 Value<String> repeatType = const Value.absent(),
                 Value<bool> repeatEndUsed = const Value.absent(),
                 Value<DateTime?> repeatEndDate = const Value.absent(),
-              }) => ScheduledCompanion.insert(
+              }) => UpcomingScheduledCompanion.insert(
                 id: id,
                 title: title,
                 color: color,
@@ -1625,21 +1643,25 @@ class $$ScheduledTableTableManager
       );
 }
 
-typedef $$ScheduledTableProcessedTableManager =
+typedef $$UpcomingScheduledTableProcessedTableManager =
     ProcessedTableManager<
       _$LocalDatabase,
-      $ScheduledTable,
-      ScheduledData,
-      $$ScheduledTableFilterComposer,
-      $$ScheduledTableOrderingComposer,
-      $$ScheduledTableAnnotationComposer,
-      $$ScheduledTableCreateCompanionBuilder,
-      $$ScheduledTableUpdateCompanionBuilder,
+      $UpcomingScheduledTable,
+      UpcomingScheduledData,
+      $$UpcomingScheduledTableFilterComposer,
+      $$UpcomingScheduledTableOrderingComposer,
+      $$UpcomingScheduledTableAnnotationComposer,
+      $$UpcomingScheduledTableCreateCompanionBuilder,
+      $$UpcomingScheduledTableUpdateCompanionBuilder,
       (
-        ScheduledData,
-        BaseReferences<_$LocalDatabase, $ScheduledTable, ScheduledData>,
+        UpcomingScheduledData,
+        BaseReferences<
+          _$LocalDatabase,
+          $UpcomingScheduledTable,
+          UpcomingScheduledData
+        >,
       ),
-      ScheduledData,
+      UpcomingScheduledData,
       PrefetchHooks Function()
     >;
 typedef $$CompletedScheduledTableCreateCompanionBuilder =
@@ -2061,8 +2083,8 @@ typedef $$JournalTableProcessedTableManager =
 class $LocalDatabaseManager {
   final _$LocalDatabase _db;
   $LocalDatabaseManager(this._db);
-  $$ScheduledTableTableManager get scheduled =>
-      $$ScheduledTableTableManager(_db, _db.scheduled);
+  $$UpcomingScheduledTableTableManager get upcomingScheduled =>
+      $$UpcomingScheduledTableTableManager(_db, _db.upcomingScheduled);
   $$CompletedScheduledTableTableManager get completedScheduled =>
       $$CompletedScheduledTableTableManager(_db, _db.completedScheduled);
   $$JournalTableTableManager get journal =>

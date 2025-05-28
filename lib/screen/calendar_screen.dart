@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:re_live/widget/main_calendar.dart';
 import '../controller/select_schedule_controller.dart';
 import '../widget/journal_widget.dart';
-import '../widget/scheduled_event_list.dart';
+import '../widget/schedule/upcoming_scheduled_list.dart';
 
 class CalendarScreen extends StatefulWidget {
   CalendarScreen({super.key});
@@ -49,7 +49,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               Expanded(
                 child: isPastDate()
                     ? JournalWidget()
-                    : ScheduledEventList(isScrollable: true),
+                    : UpcomingScheduledList(isScrollable: true),
               ),
             ],
           ),

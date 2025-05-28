@@ -4,11 +4,11 @@ import 'package:re_live/services/database_service.dart';
 import '../database/drift_database.dart';
 import 'notification_controller.dart';
 
-class DbScheduleController extends GetxController {
-  static DbScheduleController get to => Get.find();
+class DbUpcomingScheduleController extends GetxController {
+  static DbUpcomingScheduleController get to => Get.find();
 
-  var schedules = <ScheduledData>[].obs;
-  var lateSchedules = <ScheduledData>[].obs;
+  var upcomingSchedules = <UpcomingScheduledData>[].obs;
+  var lateSchedules = <UpcomingScheduledData>[].obs;
   Rx<DateTime> get selectDate => SelectScheduleController.to.selectDate;
 
   @override
@@ -26,10 +26,10 @@ class DbScheduleController extends GetxController {
 
   Future<void> loadSchedules() async {
     final db = DatabaseService.to.db;
-    schedules.value = await db.getSchedulesByDate(selectDate.value);
+    upcomingSchedules.value = await db.getSchedulesByDate(selectDate.value);
   }
 
-  Future<void> addSchedule(ScheduledCompanion schedule) async {
+  Future<void> addSchedule(UpcomingScheduledCompanion schedule) async {
     final db = DatabaseService.to.db;
     await db.insertSchedule(schedule);
     await loadSchedules();
@@ -44,17 +44,17 @@ class DbScheduleController extends GetxController {
     print("일정 id ${id} 가 삭제됨");
   }
 
-  Future<ScheduledData?> searchSchedule(int id) async {
+  Future<UpcomingScheduledData?> searchSchedule(int id) async {
     await loadSchedules();
     try {
-      return schedules.firstWhere((schedule) => schedule.id == id);
+      return upcomingSchedules.firstWhere((schedule) => schedule.id == id);
     } catch (e) {
       // 해당 id를 가진 schedule이 없을 경우 null 반환
       return null;
     }
   }
 
-  Future<ScheduledData?> getCurrentRunning() async {
+  Future<UpcomingScheduledData?> getCurrentRunning() async {
     final db = DatabaseService.to.db;
     return await db.getCurrentRunningSchedule();
   }
@@ -64,7 +64,7 @@ class DbScheduleController extends GetxController {
     lateSchedules.value = await db.getTodayLateSchedules();
   }
 
-  Future<void> updateSchedule(int id, ScheduledCompanion newValues) async {
+  Future<void> updateSchedule(int id, UpcomingScheduledCompanion newValues) async {
     final db = DatabaseService.to.db;
     await db.updateSchedule(id, newValues);
     loadSchedules();

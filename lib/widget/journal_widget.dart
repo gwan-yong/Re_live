@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:re_live/controller/db_journal_controller.dart';
 
 import '../theme/colors.dart';
-import 'completed_event_list.dart';
-import 'missed_event_list.dart';
+import 'schedule/completed_scheduled_list.dart';
+import 'schedule/missed_scheduled_list.dart';
 
 class JournalWidget extends StatelessWidget {
   const JournalWidget({super.key});
@@ -29,14 +29,14 @@ class JournalWidget extends StatelessWidget {
                     '오늘 진행된 일정'
                 ),
               ),
-              CompletedEventList(),
+              CompletedScheduledList(),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: Text(
                     '오늘 하루의 대한 감상평'
                 ),
               ),
-              MissedEventList(),
+              MissedScheduledList(),
               Container(
                 width: 348,
                 height: 50,

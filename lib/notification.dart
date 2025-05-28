@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:re_live/screen/camera_screen.dart';
-import 'package:re_live/screen/missed_event_journal.dart';
+import 'package:re_live/screen/missed_scheduled_screen.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz; // ✅ 추가
 
@@ -54,7 +54,7 @@ Future<void> initNotification() async {
             navigatorKey.currentState?.push(
               MaterialPageRoute(
                 builder:
-                    (_) => MissedEventJournal(
+                    (_) => MissedScheduledScreen(
                   scheduledId: id,
                   title: title,
                   startTime: startTime,

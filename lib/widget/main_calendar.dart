@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:re_live/screen/event_screen.dart';
+import 'package:re_live/screen/scheduled_detail_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../controller/select_schedule_controller.dart';
 import '../database/drift_database.dart';
@@ -203,7 +203,7 @@ class _MainCalendarState extends State<MainCalendar> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => EventScreen(),
+                        builder: (context) => ScheduledDetailScreen(),
                       ),
                     );
                     SelectScheduleController.to.selectDate.value = _selectedDay ?? _focusedDay;

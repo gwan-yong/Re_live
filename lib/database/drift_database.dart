@@ -4,13 +4,13 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
-import 'package:re_live/model/scheduled.dart';
+import 'package:re_live/model/upcoming_scheduled.dart';
 import '../model/completed_scheduled.dart';
 import '../model/journal.dart';
 
 part 'drift_database.g.dart';
 
-@DriftDatabase(tables: [Scheduled, CompletedScheduled, Journal])
+@DriftDatabase(tables: [UpcomingScheduled, CompletedScheduled, Journal])
 class LocalDatabase extends _$LocalDatabase {
   // 싱글턴 인스턴스를 위한 정적 변수
   static final LocalDatabase _instance = LocalDatabase._internal();
@@ -27,23 +27,23 @@ class LocalDatabase extends _$LocalDatabase {
   int get schemaVersion => 1;
 
   //일정 입력
-  Future<int> insertSchedule(ScheduledCompanion schedule) {
-    return into(scheduled).insert(schedule);
+  Future<int> insertSchedule(UpcomingScheduledCompanion schedule) {
+    return into(upcomingScheduled).insert(schedule);
   }
 
   //해당 일정 삭제
   Future<int> deleteSchedule(int scheduleId) {
-    return (delete(scheduled)..where((tbl) => tbl.id.equals(scheduleId))).go();
+    return (delete(upcomingScheduled)..where((tbl) => tbl.id.equals(scheduleId))).go();
   }
 
   //모든 scheduled 데이터 출력
-  Future<List<ScheduledData>> getAllSchedules() {
-    return select(scheduled).get();
+  Future<List<UpcomingScheduledData>> getAllSchedules() {
+    return select(upcomingScheduled).get();
   }
 
   //해당 날짜에 실행 예정인 일정 출력
-  Future<List<ScheduledData>> getSchedulesByDate(DateTime targetDate) async {
-    final allSchedules = await select(scheduled).get();
+  Future<List<UpcomingScheduledData>> getSchedulesByDate(DateTime targetDate) async {
+    final allSchedules = await select(upcomingScheduled).get();
     final completed = await select(completedScheduled).get();
 
     // targetDate를 기준으로 연, 월, 일만 비교하도록 normalization
@@ -95,7 +95,7 @@ class LocalDatabase extends _$LocalDatabase {
   }
 
   //현재 진행중인 일정 가져오기
-  Future<ScheduledData?> getCurrentRunningSchedule() async {
+  Future<UpcomingScheduledData?> getCurrentRunningSchedule() async {
     final now = DateTime.now();
     final nowMinutes = now.hour * 60 + now.minute;
 
@@ -126,21 +126,21 @@ class LocalDatabase extends _$LocalDatabase {
 
 
   //일정 수정
-  Future<void> updateSchedule(int id, ScheduledCompanion newValues) async {
-    await (update(scheduled)..where((tbl) => tbl.id.equals(id)))
+  Future<void> updateSchedule(int id, UpcomingScheduledCompanion newValues) async {
+    await (update(upcomingScheduled)..where((tbl) => tbl.id.equals(id)))
         .write(newValues);
   }
 
   //등록하지 못한 일정 가져오기
-  Future<List<ScheduledData>> getTodayLateSchedules() async {
+  Future<List<UpcomingScheduledData>> getTodayLateSchedules() async {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day); // 오늘 00:00
     final startOfNextDay = startOfDay.add(Duration(days: 1));         // 내일 00:00
 
-    final query = select(scheduled).join([
+    final query = select(upcomingScheduled).join([
       innerJoin(
         completedScheduled,
-        completedScheduled.scheduledId.equalsExp(scheduled.id),
+        completedScheduled.scheduledId.equalsExp(upcomingScheduled.id),
         useColumns: false,
       )
     ])
@@ -148,7 +148,7 @@ class LocalDatabase extends _$LocalDatabase {
       ..where(completedScheduled.lateComment.isNotNull());
 
     final result = await query.get();
-    return result.map((row) => row.readTable(scheduled)).toList();
+    return result.map((row) => row.readTable(upcomingScheduled)).toList();
   }
 
 

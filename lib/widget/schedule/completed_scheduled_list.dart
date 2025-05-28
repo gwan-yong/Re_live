@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../controller/db_complete_schedule_controller.dart';
+import '../../controller/db_complete_schedule_controller.dart';
 import 'package:get/get.dart';
 
 
-class CompletedEventList extends StatelessWidget {
-  CompletedEventList({super.key});
+class CompletedScheduledList extends StatelessWidget {
+  CompletedScheduledList({super.key});
 
   @override
   Widget build(BuildContext context) {
