@@ -1,10 +1,10 @@
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:re_live/theme/colors.dart';
-import 'package:re_live/widget/missed_event_list.dart';
+import 'package:re_live/widget/schedule/missed_scheduled_list.dart';
 import '../controller/db_journal_controller.dart';
 import '../database/drift_database.dart';
-import '../widget/completed_event_list.dart';
-import 'package:drift/drift.dart' as drift;
+import '../widget/schedule/completed_scheduled_list.dart';
 import 'home_screen.dart';
 
 class JournalScreen extends StatelessWidget{
@@ -32,14 +32,14 @@ class JournalScreen extends StatelessWidget{
                       '오늘 진행된 일정'
                   ),
                 ),
-                CompletedEventList(),
+                CompletedScheduledList(),
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   child: Text(
                       '소화하지 못한 일정'
                   ),
                 ),
-                MissedEventList(),
+                MissedScheduledList(),
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   child: Text(

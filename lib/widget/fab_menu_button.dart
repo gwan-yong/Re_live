@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:re_live/screen/camera_screen.dart';
-import 'package:re_live/screen/event_screen.dart';
+import 'package:re_live/screen/scheduled_detail_screen.dart';
 import 'package:re_live/screen/journal_screen.dart';
 
 class FAButtonMenu extends StatefulWidget {
@@ -83,7 +83,7 @@ class _FAButtonMenuState extends State<FAButtonMenu>
               label: '일정 보기',
               action: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => EventScreen()),
+                MaterialPageRoute(builder: (context) => ScheduledDetailScreen()),
               ),
             ),
           ],

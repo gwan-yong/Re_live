@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-class Scheduled extends Table {
+class UpcomingScheduled extends Table {
   IntColumn get id => integer().autoIncrement()(); // primary key, 정수열
   TextColumn get title => text()();
   IntColumn get color => integer().nullable()();

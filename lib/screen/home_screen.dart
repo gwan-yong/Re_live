@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:re_live/screen/calendar_screen.dart';
-import 'package:re_live/widget/completed_event_list.dart';
-import 'package:re_live/widget/scheduled_event_list.dart';
+import 'package:re_live/widget/schedule/completed_scheduled_list.dart';
+import 'package:re_live/widget/schedule/upcoming_scheduled_list.dart';
 import '../database/drift_database.dart';
 import '../widget/fab_menu_button.dart';
 
@@ -34,14 +34,14 @@ class HomeScreen extends StatelessWidget{
                             '오늘 진행된 일정'
                         ),
                       ),
-                      CompletedEventList(),
+                      CompletedScheduledList(),
                       Container(
                         margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                         child: Text(
                             '오늘 진행 예정 일정'
                         ),
                       ),
-                      ScheduledEventList(
+                      UpcomingScheduledList(
                           isScrollable: false,
                       ),
                     ],
@@ -68,7 +68,7 @@ class _title extends StatelessWidget{
           GestureDetector(
             onTap: () async{
               print("----------------------");
-              List<ScheduledData> schedules = await LocalDatabase().getAllSchedules();
+              List<UpcomingScheduledData> schedules = await LocalDatabase().getAllSchedules();
               for (var schedule in schedules) {
                 print('일정 id:${schedule.id} 제목: ${schedule.title}''날짜: ${schedule.date}');
               }
@@ -78,7 +78,7 @@ class _title extends StatelessWidget{
                 print('완료 id:${schedule.id} 일정 id:${schedule.scheduledId} 날짜: ${schedule.takenAt}');
               }
               print("-------");
-              List<ScheduledData> nowSchedules = await LocalDatabase().getSchedulesByDate(DateTime.now());
+              List<UpcomingScheduledData> nowSchedules = await LocalDatabase().getSchedulesByDate(DateTime.now());
               for (var schedule in nowSchedules) {
                 print('일정 id:${schedule.id} '
                     '제목: ${schedule.title}'
@@ -86,7 +86,7 @@ class _title extends StatelessWidget{
                 );
               }
               print("-------");
-              List<ScheduledData> lateSchedules = await LocalDatabase().getTodayLateSchedules();
+              List<UpcomingScheduledData> lateSchedules = await LocalDatabase().getTodayLateSchedules();
               for (var schedule in lateSchedules) {
                 print('놓친 일정 id:${schedule.id} '
                     '제목: ${schedule.title}'

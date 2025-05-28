@@ -11,7 +11,7 @@ import '../services/database_service.dart';
 class NotificationController extends GetxController {
   static NotificationController get to => Get.find();
 
-  var schedules = <ScheduledData>[].obs;
+  var schedules = <UpcomingScheduledData>[].obs;
 
   @override
   void onInit() {

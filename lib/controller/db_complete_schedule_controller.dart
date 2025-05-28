@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 import 'package:re_live/controller/select_schedule_controller.dart';
 import 'package:re_live/services/database_service.dart';
 import '../database/drift_database.dart';
-import 'db_schedule_controller.dart';
+import 'db_upcoming_schedule_controller.dart';
 
 class DbCompleteScheduleController extends GetxController {
   static DbCompleteScheduleController get to => Get.find();
@@ -30,8 +30,8 @@ class DbCompleteScheduleController extends GetxController {
     final db = DatabaseService.to.db;
     await db.insertCompleteSchedule(schedule);
     await loadCompleteSchedules(schedule.takenAt.value!);
-    await DbScheduleController.to.loadSchedules();
-    await DbScheduleController.to.loadLateSchedules();
+    await DbUpcomingScheduleController.to.loadSchedules();
+    await DbUpcomingScheduleController.to.loadLateSchedules();
   }
 
   Future<Map<DateTime, String>> getRandomRearImages() async {
