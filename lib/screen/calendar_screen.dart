@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:re_live/widget/main_calendar.dart';
+import 'package:re_live/widget/schedule/card_circular_carousel.dart';
 import '../controller/select_schedule_controller.dart';
 import '../widget/journal_widget.dart';
-import '../widget/schedule/upcoming_scheduled_list.dart';
+import '../widget/schedule/completed_scheduled_list_items.dart';
+import '../widget/schedule/journal_card.dart';
+import '../widget/schedule/upcoming_scheduled_list_items.dart';
 
 class CalendarScreen extends StatefulWidget {
   CalendarScreen({super.key});
@@ -22,16 +25,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final selectDate = SelectScheduleController.to.selectDate;
-
-      bool isPastDate() {
-        final today = DateTime.now();
-        final todayOnly = DateTime(today.year, today.month, today.day);
-        final targetOnly = DateTime(selectDate.value.year, selectDate.value.month, selectDate.value.day);
-
-        return targetOnly.isBefore(todayOnly);
-      }
 
       return Scaffold(
         backgroundColor: Colors.white,
@@ -46,15 +39,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
           child: Column(
             children: [
               MainCalendar(),
-              Expanded(
-                child: isPastDate()
-                    ? JournalWidget()
-                    : UpcomingScheduledList(isScrollable: true),
-              ),
+              /*Obx(() {
+                final selectedDate =
+                    SelectScheduleController.to.selectDate.value;
+                return
+                  CardCircularCarousel(
+                    key: ValueKey(selectedDate),
+                scale: 0.7);
+              }),*/
             ],
           ),
         ),
       );
-    });
   }
 }

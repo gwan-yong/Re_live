@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:re_live/widget/schedule/schedule_tile.dart';
+import 'package:re_live/widget/schedule/upcoming_schedule_card.dart';
 
 import '../../controller/db_complete_schedule_controller.dart';
 import '../../controller/db_upcoming_schedule_controller.dart';
@@ -29,7 +29,7 @@ class MissedScheduledList extends StatelessWidget {
           children: lateSchedules.map((schedule) {
             final color = Color(schedule.color ?? 0xFFCCCCCC);
 
-            return ScheduleTile(
+            return UpcomingScheduleCard(
               title: schedule.title,
               startTime: schedule.startTime,
               endUsed: schedule.endUsed,

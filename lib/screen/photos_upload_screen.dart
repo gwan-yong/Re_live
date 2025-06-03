@@ -33,7 +33,11 @@ class PhotosUploadScreen extends StatelessWidget {
     }
   }
 
-  Future<String> _saveImageToInternalStorage(File imageFile, String label) async {
+  Future<String?> _saveImageToInternalStorage(File imageFile, String label) async {
+    if (!await imageFile.exists()) {
+      return null; // 파일이 없으면 null 반환
+    }
+
     final dir = await getApplicationSupportDirectory();
     final photoDir = Directory('${dir.path}/app_data/photos');
     if (!await photoDir.exists()) {

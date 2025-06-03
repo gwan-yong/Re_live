@@ -6,7 +6,7 @@ import '../services/database_service.dart';
 class DbJournalController extends GetxController {
   static DbJournalController get to => Get.find();
   Rxn<JournalData> journal = Rxn<JournalData>();
-
+  RxList<DateTime?> journalDates = <DateTime?>[].obs;
   Rx<DateTime> get selectDate => SelectScheduleController.to.selectDate;
 
   @override
@@ -18,6 +18,7 @@ class DbJournalController extends GetxController {
     });
     // 초기 로딩
     searchJournal(selectDate.value);
+    loadJournalDates();
   }
 
 
@@ -29,6 +30,21 @@ class DbJournalController extends GetxController {
   Future<void> addJournal(JournalCompanion value) async {
     final db = DatabaseService.to.db;
     await db.insertJournal(value);
+    await loadJournalDates();
+    print('journalDates : $journalDates');
+  }
+
+  Future<void> loadJournalDates() async {
+    final db = DatabaseService.to.db;
+    final rawDates = await db.getDistinctJournalDates();
+
+    // null 제거 후 DateTime만 필터링
+    final dates = rawDates.whereType<DateTime>().toList();
+
+    dates.sort((a, b) => a.compareTo(b));
+
+    journalDates.assignAll(dates);
+    print('journalDates : $journalDates');
   }
 
 }

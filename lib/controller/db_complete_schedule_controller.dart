@@ -30,7 +30,7 @@ class DbCompleteScheduleController extends GetxController {
     final db = DatabaseService.to.db;
     await db.insertCompleteSchedule(schedule);
     await loadCompleteSchedules(schedule.takenAt.value!);
-    await DbUpcomingScheduleController.to.loadSchedules();
+    await DbUpcomingScheduleController.to.loadNowSchedules();
     await DbUpcomingScheduleController.to.loadLateSchedules();
   }
 

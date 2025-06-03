@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:re_live/theme/colors.dart';
-import 'package:re_live/widget/event_setting/date_picker_box.dart';
-import 'package:re_live/controller/select_schedule_controller.dart'; // 컨트롤러 import
+
+import 'package:re_live/controller/select_schedule_controller.dart';
+
+import 'date_picker_box.dart'; // 컨트롤러 import
 
 enum RepeatType {
   none,

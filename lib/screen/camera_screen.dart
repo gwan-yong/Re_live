@@ -15,10 +15,14 @@ class CameraScreen extends StatefulWidget {
   _CameraScreenState createState() => _CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> {
+class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderStateMixin{
   CameraController? _controller;
   late Future<void> _initializeControllerFuture;
   late List<CameraDescription> _cameras;
+
+  late AnimationController _animationController;
+  late Animation<Offset> _slideAnimation;
+
 
   int _pictureCount = 0;
   String? _rearImagePath;
@@ -60,16 +64,36 @@ class _CameraScreenState extends State<CameraScreen> {
   void initState() {
     super.initState();
     _initializeControllerFuture = _initializeCamera(useFrontCamera: false);
+
+    // 애니메이션 컨트롤러 초기화
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    // 슬라이드 애니메이션 설정 (위에서 아래로)
+    _slideAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0, 1),
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
   }
 
   @override
   void dispose() {
+    _animationController.dispose();
     try {
       _controller?.dispose();
     } catch (e) {
       print('dispose 중 오류 발생: $e');
     }
     super.dispose();
+  }
+  void _closeCameraScreen() async {
+    await _animationController.forward();
+    Navigator.of(context).pop();
   }
 
   Future<void> _takePicture() async {
@@ -122,93 +146,101 @@ class _CameraScreenState extends State<CameraScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: Text(''), backgroundColor: Colors.white),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: 5),
-            Text(
-              "00:00", // 추후 타이머 표시 가능
-              style: TextStyle(fontSize: 20.0, color: Colors.grey),
-            ),
-            SizedBox(height: 20),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.red,
-                border: Border.all(width: 3, color: Colors.black),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              height: 492,
-              width: 369,
-              child: FutureBuilder<void>(
-                future: _initializeControllerFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError || _controller == null) {
-                    return Center(child: Text('카메라 초기화 실패'));
-                  } else {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: CameraPreview(_controller!),
-                    );
-                  }
-                },
-              ),
-            ),
-            SizedBox(height: 50),
-            Container(
-              height: 95,
-              width: 245,
-              decoration: BoxDecoration(
-                color: secondaryColor,
-                borderRadius: BorderRadius.circular(32),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  IconButton(
-                    onPressed: () async {
-                      final rearFile = await copyAssetToFile('assets/img/sample4.jpeg', 'rear_temp.jpeg');
-                      final frontFile = await copyAssetToFile('assets/img/sample1.jpeg', 'front_temp.jpeg');
-
-                      if (widget.fromMissedEvent) {
-                        Navigator.pop(context, {
-                          'rearImagePath': rearFile.path,
-                          'frontImagePath': frontFile.path,
-                        });
+      body: SafeArea(
+        child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: IconButton(
+                    icon: const Icon(Icons.keyboard_arrow_down, size: 32),
+                    onPressed: _closeCameraScreen,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  "00:00", // 추후 타이머 표시 가능
+                  style: TextStyle(fontSize: 20.0, color: Colors.grey),
+                ),
+                SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    border: Border.all(width: 3, color: Colors.black),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  height: 492,
+                  width: 369,
+                  child: FutureBuilder<void>(
+                    future: _initializeControllerFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError || _controller == null) {
+                        return Center(child: Text('카메라 초기화 실패'));
                       } else {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PhotosUploadScreen(
-                              rearImagePath: rearFile.path,
-                              frontImagePath: frontFile.path,
-                            ),
-                          ),
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: CameraPreview(_controller!),
                         );
                       }
                     },
-                    icon: Icon(Icons.cameraswitch),
                   ),
-                  OutlinedButton(
-                    onPressed: _takePicture,
-                    style: OutlinedButton.styleFrom(
-                      shape: CircleBorder(),
-                      side: BorderSide(width: 6, color: Colors.white),
-                      fixedSize: Size(80, 80),
-                      padding: EdgeInsets.zero,
-                    ),
-                    child: Text(""),
+                ),
+                SizedBox(height: 50),
+                Container(
+                  height: 95,
+                  width: 245,
+                  decoration: BoxDecoration(
+                    color: secondaryColor,
+                    borderRadius: BorderRadius.circular(32),
                   ),
-                ],
-              ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        onPressed: () async {
+                          final rearFile = await copyAssetToFile('assets/img/sample4.jpeg', 'rear_temp.jpeg');
+                          final frontFile = await copyAssetToFile('assets/img/sample1.jpeg', 'front_temp.jpeg');
+        
+                          if (widget.fromMissedEvent) {
+                            Navigator.pop(context, {
+                              'rearImagePath': rearFile.path,
+                              'frontImagePath': frontFile.path,
+                            });
+                          } else {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PhotosUploadScreen(
+                                  rearImagePath: rearFile.path,
+                                  frontImagePath: frontFile.path,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        icon: Icon(Icons.cameraswitch),
+                      ),
+                      OutlinedButton(
+                        onPressed: _takePicture,
+                        style: OutlinedButton.styleFrom(
+                          shape: CircleBorder(),
+                          side: BorderSide(width: 6, color: Colors.white),
+                          fixedSize: Size(80, 80),
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: Text(""),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
       ),
     );
   }

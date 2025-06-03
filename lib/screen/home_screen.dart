@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:re_live/screen/calendar_screen.dart';
-import 'package:re_live/widget/schedule/completed_scheduled_list.dart';
-import 'package:re_live/widget/schedule/upcoming_scheduled_list.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:re_live/screen/bottom_area.dart';
+import 'package:re_live/widget/schedule/card_circular_carousel.dart';
+import '../controller/card_carousel_controller.dart';
+import '../controller/select_schedule_controller.dart';
 import '../database/drift_database.dart';
 import '../widget/fab_menu_button.dart';
 
-class HomeScreen extends StatelessWidget{
+
+
+class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   final LocalDatabase database = LocalDatabase();
   final DateTime selectedDate = DateTime.now();
 
-  Widget build(BuildContext context){
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -20,104 +32,59 @@ class HomeScreen extends StatelessWidget{
             bottom: false,
             child: Container(
               margin: EdgeInsets.all(0),
-              child: ListView(
-                scrollDirection: Axis.vertical, //세로 스크롤
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _title(),
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        child: Text(
-                            '오늘 진행된 일정'
-                        ),
-                      ),
-                      CompletedScheduledList(),
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        child: Text(
-                            '오늘 진행 예정 일정'
-                        ),
-                      ),
-                      UpcomingScheduledList(
-                          isScrollable: false,
-                      ),
-                    ],
-                  ),
-                ],
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _title(),
+                    Obx(() {
+                      final selectedDate = SelectScheduleController.to.selectDate.value;
+                      return CardCircularCarousel(
+                        key: ValueKey(selectedDate),
+                        scale: CardCarouselController.to.cardCarouselScale.value,
+                      );
+                    }),
+                    BottomArea(
+                      onCalendarOpened: () {
+                        setState(() {
+                          CardCarouselController.to.setScale (0.7);
+                        });
+                      },
+                      onCalendarClosed: () {
+                        setState(() {
+                          CardCarouselController.to.setScale (1.0);
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-          FAButtonMenu(),
+          //FAButtonMenu(),
         ],
       ),
     );
   }
-}
 
-class _title extends StatelessWidget{
-  Widget build(BuildContext context){
+
+  Widget _title() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           GestureDetector(
-            onTap: () async{
-              print("----------------------");
-              List<UpcomingScheduledData> schedules = await LocalDatabase().getAllSchedules();
-              for (var schedule in schedules) {
-                print('일정 id:${schedule.id} 제목: ${schedule.title}''날짜: ${schedule.date}');
-              }
-              print("-------");
-              List<CompletedScheduledData> completeSchedules = await LocalDatabase().getAllCompletePhotos();
-              for (var schedule in completeSchedules) {
-                print('완료 id:${schedule.id} 일정 id:${schedule.scheduledId} 날짜: ${schedule.takenAt}');
-              }
-              print("-------");
-              List<UpcomingScheduledData> nowSchedules = await LocalDatabase().getSchedulesByDate(DateTime.now());
-              for (var schedule in nowSchedules) {
-                print('일정 id:${schedule.id} '
-                    '제목: ${schedule.title}'
-                    '날짜: ${schedule.date}'
-                );
-              }
-              print("-------");
-              List<UpcomingScheduledData> lateSchedules = await LocalDatabase().getTodayLateSchedules();
-              for (var schedule in lateSchedules) {
-                print('놓친 일정 id:${schedule.id} '
-                    '제목: ${schedule.title}'
-                    '날짜: ${schedule.date}'
-                );
-              }
-              print("----------------------");
-
+            onTap: () async {
+              // 로그 출력 코드 생략 가능
             },
             child: Text(
               'ReLive',
-              textAlign: TextAlign.left,
-              style : TextStyle(
-                fontSize : 50.0,
-              ),
+              style: TextStyle(fontSize: 50.0),
             ),
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CalendarScreen()),
-              );
-            },
-            icon: Icon(Icons.calendar_month),
-            iconSize: 40,
-
           ),
         ],
       ),
     );
   }
 }
-

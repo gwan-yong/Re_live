@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:re_live/screen/scheduled_detail_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../controller/select_schedule_controller.dart';
 import '../database/drift_database.dart';
@@ -45,6 +44,11 @@ class _MainCalendarState extends State<MainCalendar> {
       color: Colors.white,
       child: Column(
         children: [
+          Container(
+            height: 4,
+            color: secondaryColor,
+          ),
+
           // 달력 상단 년, 월 표시
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -183,7 +187,7 @@ class _MainCalendarState extends State<MainCalendar> {
 
           SizedBox(height: 10),
 
-          Container(
+          /*Container(
             height: 4,
             color: secondaryColor,
           ),
@@ -213,7 +217,7 @@ class _MainCalendarState extends State<MainCalendar> {
                 ),
               ],
             ),
-          ),
+          ),*/
         ],
       ),
     );

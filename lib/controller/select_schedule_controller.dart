@@ -16,6 +16,8 @@ class SelectScheduleController extends GetxController {
   late RxBool repeatEndUsed;
   late final Rx<DateTime?> repeatEndDate = Rx<DateTime?>(null);
 
+
+
   SelectScheduleController({
     int initialId = 0,
     String initialTitle = '',
@@ -82,4 +84,9 @@ class SelectScheduleController extends GetxController {
     repeatEndDate.value = null;
     print('[SelectScheduleController] reset() 호출됨 - 상태 초기화 완료');
   }
+
+
+
+
+
 }

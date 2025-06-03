@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ScheduleTile extends StatelessWidget {
+class UpcomingScheduleCard extends StatelessWidget {
   final String title;
   final int? startTime;
   final bool endUsed;
@@ -10,7 +10,7 @@ class ScheduleTile extends StatelessWidget {
   final VoidCallback? onTap;
   final String? lateCommet;
 
-  const ScheduleTile({
+  const UpcomingScheduleCard({
     required this.title,
     required this.startTime,
     required this.endUsed,
@@ -37,7 +37,7 @@ class ScheduleTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 25)),
+            Text(title, style: const TextStyle(fontSize: 20)),
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,

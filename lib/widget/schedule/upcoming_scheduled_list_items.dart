@@ -4,7 +4,7 @@ import '../../controller/db_upcoming_schedule_controller.dart';
 import '../../controller/notification_controller.dart';
 import '../../controller/select_schedule_controller.dart';
 import '../../screen/scheduled_detail_screen.dart';
-import 'package:re_live/widget/schedule/schedule_tile.dart';
+import 'package:re_live/widget/schedule/upcoming_schedule_card.dart';
 
 class UpcomingScheduledListItems {
   static List<Widget> build(BuildContext context) {
@@ -20,7 +20,7 @@ class UpcomingScheduledListItems {
     return schedules.map((schedule) {
       final color = Color(schedule.color ?? 0xFFCCCCCC);
 
-      return ScheduleTile(
+      return UpcomingScheduleCard(
         title: schedule.title,
         startTime: schedule.startTime,
         endUsed: schedule.endUsed,
