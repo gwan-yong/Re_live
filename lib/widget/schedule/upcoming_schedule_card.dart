@@ -31,19 +31,20 @@ class ScheduleTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
         ),
         width: double.infinity,
-        height: 90,
-        padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.symmetric(vertical: 5),
+        height: double.infinity,
+        padding: const EdgeInsets.all(13),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(title, style: const TextStyle(fontSize: 25)),
-            Row(
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(_formatTime(startTime)),
-                if (endUsed) Text(" ~ ${_formatTime(endTime)}"),
-                if (lateCommet != null) Text(' 사유 : $lateCommet'),
+                Text(_formatTime(startTime),style: const TextStyle(fontSize: 12)),
+                if (endUsed) Text(" ~ ${_formatTime(endTime)}",style: const TextStyle(fontSize: 11)),
+                if (lateCommet != null) Text(' 사유 : $lateCommet',style: const TextStyle(fontSize: 11)),
               ],
             ),
           ],
