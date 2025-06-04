@@ -31,6 +31,7 @@ class JournalCard extends StatelessWidget {
             DateFormat('a h:mm', 'ko').format(journal.value!.date),
             style: const TextStyle(fontSize: 12),
           ),
+          Text(journal.value!.comment),
         ],
       ),
     );

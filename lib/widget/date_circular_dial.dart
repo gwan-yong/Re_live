@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:re_live/controller/db_journal_controller.dart';
 import 'package:re_live/controller/db_upcoming_schedule_controller.dart';
+import 'package:re_live/widget/schedule/rotating_dial.dart';
 
 import '../controller/select_schedule_controller.dart';
 
@@ -39,6 +40,30 @@ class _DateCircularDialState extends State<DateCircularDial> {
     if (index == centerIndex) yOffset -= 20;
     return yOffset;
   }
+  void scrollToSelectedDate(List<DateTime> allDates) {
+    final selectedDate = SelectScheduleController.to.selectDate.value;
+
+    // 날짜와 일치하는 인덱스를 찾음 (날짜만 비교)
+    final index = allDates.indexWhere((date) =>
+    date.year == selectedDate.year &&
+        date.month == selectedDate.month &&
+        date.day == selectedDate.day);
+
+    if (index != -1) {
+      double itemSpacing = 12.5; // 카드 간 간격
+      double targetOffset = itemSpacing * index;
+
+      _scrollController.animateTo(
+        targetOffset,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+      );
+
+      print('📍 선택된 날짜($selectedDate)에 해당하는 인덱스로 스크롤됨: $index');
+    } else {
+      print('⚠️ 선택된 날짜가 리스트에 없음: $selectedDate');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +80,10 @@ class _DateCircularDialState extends State<DateCircularDial> {
         if (journalDates.isNotEmpty) ...journalDates,
         if (scheduleDates.isNotEmpty) ...scheduleDates,
       ];
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scrollToSelectedDate(allDates);
+      });
 
       // 둘 다 비어 있으면 아무것도 출력하지 않음
       if (allDates.isEmpty) {
@@ -194,6 +223,7 @@ class _DateCircularDialState extends State<DateCircularDial> {
               ),
             ),
           ),
+          RotatingDial(size: 100),
         ],
       );
     });

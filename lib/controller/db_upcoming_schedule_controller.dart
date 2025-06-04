@@ -19,12 +19,14 @@ class DbUpcomingScheduleController extends GetxController {
     // 날짜가 바뀔 때마다 자동으로 일정 로딩
     ever(selectDate, (_) {
       loadNowSchedules();
+      loadAllSchedules();
     });
 
     // 초기 로딩
     loadNowSchedules();
     loadLateSchedules();
     loadSchedulesDates();
+    loadAllSchedules();
   }
 
   Future<void> loadNowSchedules() async {

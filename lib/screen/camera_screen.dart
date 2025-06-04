@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import '../controller/select_schedule_controller.dart';
 import '../theme/colors.dart';
 import 'photos_upload_screen.dart';
 
@@ -79,6 +80,7 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
+
   }
 
   @override
@@ -160,10 +162,6 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
                   ),
                 ),
                 SizedBox(height: 5),
-                Text(
-                  "00:00", // 추후 타이머 표시 가능
-                  style: TextStyle(fontSize: 20.0, color: Colors.grey),
-                ),
                 SizedBox(height: 20),
                 Container(
                   decoration: BoxDecoration(

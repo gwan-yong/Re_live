@@ -123,20 +123,26 @@ class _CardCircularCarouselState extends State<CardCircularCarousel> {
   }
 
   double getYOffsetForIndex(int index, int centerIndex) {
-    int diff = (index - centerIndex).abs();
-    switch (diff) {
-      case 0:
-        return -50;
-      case 1:
-        return -30;
-      case 2:
-        return 10;
-      case 3:
-        return 40;
-      default:
-        return 70;
-    }
+    int relativeIndex = index - centerIndex;
+    double radius = 150.0; // 아치 높이 조절
+
+    // 거리 정규화: -1 ~ 1 범위로 제한
+    double normalized = (relativeIndex / 4.0).clamp(-1.0, 1.0);
+
+    // 사인 곡선으로 y 위치 계산 (중심이 가장 높고, 좌우로 갈수록 내려감)
+    return -sin((1 - normalized.abs()) * pi / 2) * radius +100;
   }
+
+
+  double getAngleForIndex(int index, int centerIndex) {
+    int relativeIndex = index - centerIndex;
+    double maxAngle = pi / 6; // ±30도
+    double normalized = (relativeIndex / 5.0).clamp(-1.0, 1.0);
+
+    // 곡선 회전: 중앙에 가까울수록 부드럽게 0도에 수렴
+    return sin(normalized * pi / 2) * maxAngle;
+  }
+
 
   void scrollToIndex(int index ,int duration) {
     double targetOffset = index <= 1 ? 0 : cardSpacing * (index-1);
@@ -150,9 +156,23 @@ class _CardCircularCarouselState extends State<CardCircularCarousel> {
   @override
   Widget build(BuildContext context) {
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+   /* WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         CardCarouselController.to.updateMaxExtent(_scrollController.position.maxScrollExtent);
+      }
+    });*/
+    // 초기 스크롤 위치 설정
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        int indexToScroll = 0;
+
+        if (items2.isNotEmpty) {
+          indexToScroll = items1.length; // item2의 첫 번째 아이템 인덱스
+        } else if (items2.isEmpty && items1.isNotEmpty && item3 != null) {
+          indexToScroll = combinedItems.length - 1; // item3 인덱스
+        }
+
+        scrollToIndex(indexToScroll + 1, 700); // ✅ 부드럽게 이동
       }
     });
 
@@ -220,7 +240,8 @@ class _CardCircularCarouselState extends State<CardCircularCarousel> {
                         children: List.generate(combinedItems.length, (index) {
                           double xOffset = -index * 30.0;
                           double yOffset = getYOffsetForIndex(index, centerIndex);
-                          double angle = (index - centerIndex) * pi / 15;
+                          //double angle = (index - centerIndex) * pi / 15;
+                          double angle = getAngleForIndex(index, centerIndex);
 
                           return TweenAnimationBuilder(
                             tween: Tween<double>(begin: 0, end: yOffset),

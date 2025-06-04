@@ -38,17 +38,17 @@ class _BottomAreaState extends State<BottomArea> with TickerProviderStateMixin {
     super.initState();
 
     _dialController = AnimationController(
-      duration: const Duration(milliseconds: 100),
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     );
 
     _calendarController = AnimationController(
-      duration: const Duration(milliseconds: 100),
+      duration: const Duration(milliseconds: 200),
       vsync: this,
     );
 
     _buttonController = AnimationController(
-      duration: const Duration(milliseconds: 100),
+      duration: const Duration(milliseconds: 200),
       vsync: this,
     );
 
@@ -144,11 +144,13 @@ class _BottomAreaState extends State<BottomArea> with TickerProviderStateMixin {
                 position: _dialOffsetAnimation,
                 child: Stack(
                   children: [
-                    Column(
-                      children: [
-                        DateCircularDial(),
-                        const SizedBox(height: 30),
-                        SlideTransition(
+                    DateCircularDial(),
+                    //const SizedBox(height: 30),
+                    Positioned(
+                      bottom: 1,
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: SlideTransition(
                           position: _buttonOffsetAnimation,
                           child: Visibility(
                             visible: _showButtons,
@@ -160,6 +162,7 @@ class _BottomAreaState extends State<BottomArea> with TickerProviderStateMixin {
                                   padding: const EdgeInsets.only(left: 20.0),
                                   child: _buildCircleIcon(Icons.camera_alt, () {
                                     Navigator.of(context).push(_createCameraRoute());
+                                    SelectScheduleController.to.selectDate.value = DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day);
                                   }),
                                 ),
                                 Padding(
@@ -170,12 +173,7 @@ class _BottomAreaState extends State<BottomArea> with TickerProviderStateMixin {
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                    Positioned(
-                      bottom: 10,
-                      left: 150,
-                      child: RotatingDial(size: 100),
+                      ),
                     ),
                   ],
                 ),
@@ -262,7 +260,7 @@ class _BottomAreaState extends State<BottomArea> with TickerProviderStateMixin {
           child: child,
         );
       },
-      transitionDuration: const Duration(milliseconds: 800),
+      transitionDuration: const Duration(milliseconds: 200),
     );
   }
 }
