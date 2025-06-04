@@ -44,6 +44,7 @@ class _CardCircularCarouselState extends State<CardCircularCarousel> {
         CardCarouselController.to.syncScrollToAngle(_scrollController.offset);
       }
     });
+
   }
 
   @override
@@ -52,23 +53,6 @@ class _CardCircularCarouselState extends State<CardCircularCarousel> {
     super.dispose();
   }
 
- /* void _loadItems() {
-    if (!mounted) return;
-    setState(() {
-      items1 = CompletedScheduledListItems.build();
-      items2 = UpcomingScheduledListItems.build(context);
-      item3 = JournalCard();
-
-      if (items1.isEmpty && items2.isEmpty) {
-        combinedItems = [];
-      } else if (items1.isNotEmpty && items2.isEmpty && item3 != null) {
-        combinedItems = [...items1, item3!];
-      } else {
-        combinedItems = [...items1, ...items2];
-      }
-
-    });
-  }*/
   void _loadItems() {
     if (!mounted) return;
     items1 = CompletedScheduledListItems.build();
@@ -94,7 +78,7 @@ class _CardCircularCarouselState extends State<CardCircularCarousel> {
           indexToScroll = combinedItems.length - 1; // item3 인덱스
         }
 
-        scrollToIndex(indexToScroll + 1, 1); // +1은 getCenterIndex 보정
+        scrollToIndex(indexToScroll + 1, 700); // +1은 getCenterIndex 보정
       }
     });
 
@@ -156,23 +140,9 @@ class _CardCircularCarouselState extends State<CardCircularCarousel> {
   @override
   Widget build(BuildContext context) {
 
-   /* WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        CardCarouselController.to.updateMaxExtent(_scrollController.position.maxScrollExtent);
-      }
-    });*/
-    // 초기 스크롤 위치 설정
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
-        int indexToScroll = 0;
-
-        if (items2.isNotEmpty) {
-          indexToScroll = items1.length; // item2의 첫 번째 아이템 인덱스
-        } else if (items2.isEmpty && items1.isNotEmpty && item3 != null) {
-          indexToScroll = combinedItems.length - 1; // item3 인덱스
-        }
-
-        scrollToIndex(indexToScroll + 1, 700); // ✅ 부드럽게 이동
+        CardCarouselController.to.updateMaxExtent(_scrollController.position.maxScrollExtent);
       }
     });
 

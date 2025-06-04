@@ -96,6 +96,7 @@ class _DateCircularDialState extends State<DateCircularDial> {
             onNotification: (notification) {
               final index = getCenterIndex();
 
+
               final journalDates =
                   DbJournalController.to.journalDates
                       .whereType<DateTime>()
@@ -146,6 +147,7 @@ class _DateCircularDialState extends State<DateCircularDial> {
                       double xOffset = -index * 0.5;
                       double yOffset = getYOffsetForIndex(index, centerIndex);
                       double angle = (index - centerIndex) * pi / 60;
+
 
                       // index 기준으로 분기
                       bool isJournalDate = index < journalDates.length;
