@@ -4,7 +4,7 @@ import 'package:re_live/controller/db_journal_controller.dart';
 
 import '../theme/colors.dart';
 import 'schedule/completed_scheduled_list_items.dart';
-import 'schedule/missed_scheduled_list.dart';
+
 
 class JournalWidget extends StatelessWidget {
   const JournalWidget({super.key});
@@ -36,7 +36,6 @@ class JournalWidget extends StatelessWidget {
                     '오늘 하루의 대한 감상평'
                 ),
               ),
-              MissedScheduledList(),
               Container(
                 width: 348,
                 height: 50,

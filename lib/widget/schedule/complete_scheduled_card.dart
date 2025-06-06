@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:re_live/widget/schedule/complete_scheduled_photo.dart';
 
@@ -51,14 +52,14 @@ class CompleteScheduledCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Text(
-                    title,
+                  title,
                   style: TextStyle(fontSize: bigFont ? 30 : 15),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Text(
-                    takenAt,
+                  takenAt,
                   style: TextStyle(fontSize: bigFont ? 22 : 11),
                 ),
               ),
@@ -73,9 +74,13 @@ class CompleteScheduledCard extends StatelessWidget {
               if (lateCommet != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
+                  child: AutoSizeText(
                     lateCommet!,
-                    style: TextStyle(fontSize: bigFont ? 26 : 13),
+                    style: TextStyle(fontSize: 13),
+                    minFontSize: 9,
+                    maxFontSize: 13,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
             ],

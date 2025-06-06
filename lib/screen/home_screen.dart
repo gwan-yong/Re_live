@@ -88,8 +88,8 @@ class _HomeScreenState extends State<HomeScreen> {
               await insertSampleJournals();
               _printAllSchedules();*/
 
-                CardCarouselController.to.setScale (1);
-                CardCarouselController.to.setCardPadding(00);
+                //CardCarouselController.to.setScale (1);
+                //CardCarouselController.to.setCardPadding(00);
             },
             child: Text(
               'ReLive',
