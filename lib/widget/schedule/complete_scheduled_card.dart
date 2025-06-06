@@ -8,6 +8,7 @@ class CompleteScheduledCard extends StatelessWidget {
   final Color color;
   final String takenAt;
   final String? lateCommet;
+  final bool bigFont;
 
   const CompleteScheduledCard({
     this.rearimgPath,
@@ -16,6 +17,7 @@ class CompleteScheduledCard extends StatelessWidget {
     required this.color,
     required this.takenAt,
     this.lateCommet,
+    this.bigFont = false,
     super.key,
   });
 
@@ -33,7 +35,10 @@ class CompleteScheduledCard extends StatelessWidget {
           ),
           width: width,
           height: height,
-          padding: rearimgPath != null && rearimgPath!.isNotEmpty ? const EdgeInsets.all(1) : const EdgeInsets.only(top: 5),
+          padding:
+              rearimgPath != null && rearimgPath!.isNotEmpty
+                  ? const EdgeInsets.all(1)
+                  : const EdgeInsets.only(top: 5),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,21 +49,25 @@ class CompleteScheduledCard extends StatelessWidget {
                   frontimgPath: frontimgPath!,
                 ),
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10.0,
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: Text(
+                    title,
+                  style: TextStyle(fontSize: bigFont ? 30 : 15),
                 ),
-                child: Text(title, style: const TextStyle(fontSize: 15)),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Text(takenAt, style: const TextStyle(fontSize: 11)),
+                child: Text(
+                    takenAt,
+                  style: TextStyle(fontSize: bigFont ? 22 : 11),
+                ),
               ),
               if (lateCommet != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Text(
                     '일정을 놓친 이유',
-                    style: const TextStyle(fontSize: 11),
+                    style: TextStyle(fontSize: bigFont ? 22 : 11),
                   ),
                 ),
               if (lateCommet != null)
@@ -66,7 +75,7 @@ class CompleteScheduledCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Text(
                     lateCommet!,
-                    style: const TextStyle(fontSize: 13),
+                    style: TextStyle(fontSize: bigFont ? 26 : 13),
                   ),
                 ),
             ],

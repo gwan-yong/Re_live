@@ -145,7 +145,6 @@ class _BottomAreaState extends State<BottomArea> with TickerProviderStateMixin {
                 child: Stack(
                   children: [
                     DateCircularDial(),
-                    //const SizedBox(height: 30),
                     Positioned(
                       bottom: 1,
                       child: SizedBox(
@@ -260,7 +259,7 @@ class _BottomAreaState extends State<BottomArea> with TickerProviderStateMixin {
           child: child,
         );
       },
-      transitionDuration: const Duration(milliseconds: 200),
+      transitionDuration: const Duration(milliseconds: 400),
     );
   }
 }

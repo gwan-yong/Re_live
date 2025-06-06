@@ -16,6 +16,7 @@ class _DateCircularDialState extends State<DateCircularDial> {
   final ScrollController _scrollController = ScrollController();
   late double screenWidth;
   final double cardWidth = 5;
+  int? lastCenterIndex;
 
   double get leftPadding => screenWidth / 2;
 
@@ -23,6 +24,12 @@ class _DateCircularDialState extends State<DateCircularDial> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     screenWidth = MediaQuery.of(context).size.width;
+
+
+
+
+
+
   }
 
   int getCenterIndex() {
@@ -59,7 +66,7 @@ class _DateCircularDialState extends State<DateCircularDial> {
         curve: Curves.easeOut,
       );
 
-      print('📍 선택된 날짜($selectedDate)에 해당하는 인덱스로 스크롤됨: $index');
+      //print('📍 선택된 날짜($selectedDate)에 해당하는 인덱스로 스크롤됨: $index');
     } else {
       print('⚠️ 선택된 날짜가 리스트에 없음: $selectedDate');
     }
@@ -110,15 +117,15 @@ class _DateCircularDialState extends State<DateCircularDial> {
               if (index < journalDates.length) {
                 SelectScheduleController.to.selectDate.value =
                     journalDates[index];
-                print(
+                /*print(
                   '🎯 Center Date (from journalDates): ${journalDates[index]}',
-                );
+                );*/
               } else if (index - journalDates.length < scheduleDates.length) {
                 SelectScheduleController.to.selectDate.value =
                     scheduleDates[index - journalDates.length];
-                print(
+                /*print(
                   '🎯 Center Date (from scheduleDates): ${scheduleDates[index - journalDates.length]}',
-                );
+                );*/
               } else {
                 print('⚠️ Index out of bounds');
               }
@@ -129,6 +136,27 @@ class _DateCircularDialState extends State<DateCircularDial> {
               animation: _scrollController,
               builder: (context, child) {
                 int centerIndex = getCenterIndex();
+
+
+                /*if (centerIndex != lastCenterIndex) {
+                  lastCenterIndex = centerIndex;
+
+                  final journalDates = DbJournalController.to.journalDates
+                      .whereType<DateTime>().toList();
+                  final scheduleDates = DbUpcomingScheduleController.to
+                      .UpcomingSchedulesDates.whereType<DateTime>().toList();
+
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (centerIndex < journalDates.length) {
+                      SelectScheduleController.to.selectDate.value =
+                      journalDates[centerIndex];
+                    } else if (centerIndex - journalDates.length <
+                        scheduleDates.length) {
+                      SelectScheduleController.to.selectDate.value =
+                      scheduleDates[centerIndex - journalDates.length];
+                    }
+                  });
+                }*/
 
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -147,6 +175,7 @@ class _DateCircularDialState extends State<DateCircularDial> {
                       double xOffset = -index * 0.5;
                       double yOffset = getYOffsetForIndex(index, centerIndex);
                       double angle = (index - centerIndex) * pi / 60;
+
 
 
                       // index 기준으로 분기
@@ -236,7 +265,7 @@ class _DateCircularDialState extends State<DateCircularDial> {
 class _SlowScrollPhysics extends ClampingScrollPhysics {
   final double speedFactor;
 
-  const _SlowScrollPhysics({this.speedFactor = 0.3, ScrollPhysics? parent})
+  const _SlowScrollPhysics({this.speedFactor =0.3, ScrollPhysics? parent})
     : super(parent: parent);
 
   @override

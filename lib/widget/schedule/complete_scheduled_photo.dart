@@ -37,12 +37,12 @@ class CompleteScheduledPhoto extends StatelessWidget {
                 bottom: 5,
                 left: 5,
                 child: Container(
-                  width: 56,
-                  height: 80,
+                  width: width/3,
+                  height: height/3,
                   margin: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.black, width: 3),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(13),

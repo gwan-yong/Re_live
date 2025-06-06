@@ -12,62 +12,6 @@ class RotatingDial extends StatefulWidget {
   State<RotatingDial> createState() => _RotatingDialState();
 }
 
-/*class _RotatingDialState extends State<RotatingDial> {
-  double angle = 0.0;
-  Offset center = Offset.zero;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onPanStart: (details) {
-        RenderBox box = context.findRenderObject() as RenderBox;
-        center = box.size.center(Offset.zero);
-      },
-      onPanUpdate: (details) {
-        final Offset localPosition = details.localPosition;
-        final Offset delta = localPosition - center;
-
-        final newAngle = (atan2(delta.dy, delta.dx) * 180 / pi + 450) % 360;
-        final angleDelta = (newAngle - angle + 540) % 360 - 180;
-
-        final proposedAngle = (angle + angleDelta) % 360;
-
-        // 컨트롤러 기준 현재 각도
-        final controller = CardCarouselController.to;
-        final currentAngle = controller.scrollAngle.value;
-
-        // clamp 범위
-        const minAngle = 0.0;
-        const maxAngle = 360.0;
-        const tolerance = 0.5;
-
-        final isAtMin = currentAngle <= minAngle + tolerance;
-        final isAtMax = currentAngle >= maxAngle - tolerance;
-
-        final tryingToDecrease = angleDelta < 0;
-        final tryingToIncrease = angleDelta > 0;
-        print('tryingToDecrease: ${tryingToDecrease}');
-
-        // 범위 밖으로 가는 드래그는 무시
-        if ((isAtMin && tryingToDecrease) || (isAtMax && tryingToIncrease)) {
-          return;
-        }
-
-        // 허용된 경우만 업데이트
-        angle = proposedAngle.clamp(minAngle, maxAngle);
-        controller.updateAngle(angle);
-      },
-      child: Obx(() {
-        // 현재 각도를 라디안으로 변환하여 전달
-        final angleRad = CardCarouselController.to.scrollAngle.value * pi / 180;
-        return CustomPaint(
-          size: Size(widget.size, widget.size),
-          painter: _DialPainter(angle: angleRad),
-        );
-      }),
-    );
-  }
-}*/
 class _RotatingDialState extends State<RotatingDial> {
   Offset center = Offset.zero;
 

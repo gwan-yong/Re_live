@@ -187,37 +187,6 @@ class _MainCalendarState extends State<MainCalendar> {
 
           SizedBox(height: 10),
 
-          /*Container(
-            height: 4,
-            color: secondaryColor,
-          ),
-
-          // 하단 오늘 날짜 표시
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-            child: Row(
-              children: [
-                Text(
-                  '${_focusedDay.day}일',
-                ),
-                Spacer(),
-                // 일정 추가 버튼
-                IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ScheduledDetailScreen(),
-                      ),
-                    );
-                    SelectScheduleController.to.selectDate.value = _selectedDay ?? _focusedDay;
-                    print(_selectedDay ?? _focusedDay);
-                  },
-                  icon: Icon(Icons.add),
-                ),
-              ],
-            ),
-          ),*/
         ],
       ),
     );

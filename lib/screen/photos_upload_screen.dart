@@ -8,6 +8,7 @@ import 'package:re_live/controller/db_upcoming_schedule_controller.dart';
 import '../database/drift_database.dart';
 import '../notification.dart';
 import '../theme/colors.dart';
+import '../widget/schedule/complete_scheduled_card.dart';
 import 'home_screen.dart'; // DB 접근을 위한 임포트
 
 class PhotosUploadScreen extends StatelessWidget {
@@ -96,22 +97,25 @@ class PhotosUploadScreen extends StatelessWidget {
           body: SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: _PreviewPhotos(
-                    rearImagePath: rearImagePath,
-                    frontImagePath: frontImagePath,
+                Center(
+                  child: Container(
+                    height: 609,
+                    width: 330,
+                    child: Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: CompleteScheduledCard(
+                        rearimgPath: rearImagePath,
+                        frontimgPath: frontImagePath,
+                        title: title,
+                        color: color,
+                        takenAt: _getCurrentFormattedTime(),
+                        bigFont: true,
+                      ),
+                    ),
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 25 , vertical: 1),
-                  child: Text(
-                      '업로드 할 일정'
-                  ),
-                ),
-                _EventTile(title, startTime, endUsed, endTime, color),
                 SizedBox(
                   height: 15,
                 ),

@@ -47,6 +47,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       return CardCircularCarousel(
                         key: ValueKey(selectedDate),
                         scale: CardCarouselController.to.cardCarouselScale.value,
+                        cardPadding: CardCarouselController.to.cardPadding.value,
+
                       );
                     }),
                     BottomArea(
@@ -81,10 +83,13 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           GestureDetector(
             onTap: () async {
-              await insertTestSchedules();
+              /*await insertTestSchedules();
               await insertTestCompletedSchedules();
               await insertSampleJournals();
-              _printAllSchedules();
+              _printAllSchedules();*/
+
+                CardCarouselController.to.setScale (1);
+                CardCarouselController.to.setCardPadding(00);
             },
             child: Text(
               'ReLive',

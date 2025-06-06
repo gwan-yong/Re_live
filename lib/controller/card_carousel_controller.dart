@@ -4,15 +4,20 @@ import 'package:get/get.dart';
 class CardCarouselController extends GetxController {
   static CardCarouselController get to => Get.find<CardCarouselController>();
   final RxDouble cardCarouselScale = 1.0.obs;
+  final RxDouble cardPadding = 0.0.obs;
+  final RxDouble scrollAngle = 0.0.obs;
+  final RxDouble maxScrollExtent = 1.0.obs;
+  final RxInt lastIndex = 0.obs;
+  final Rx<ScrollController?> scrollController = Rx<ScrollController?>(null);
 
   void setScale(double value) {
     cardCarouselScale.value = value;
   }
 
+  void setCardPadding(double value) {
+    cardPadding.value = value;
+  }
 
-  final RxDouble scrollAngle = 0.0.obs;
-  final RxDouble maxScrollExtent = 1.0.obs;
-  final Rx<ScrollController?> scrollController = Rx<ScrollController?>(null);
 
   void setScrollController(ScrollController controller) {
     scrollController.value = controller;
