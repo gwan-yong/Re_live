@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ScheduleTile extends StatelessWidget {
+class UpcomingScheduleCard extends StatelessWidget {
   final String title;
   final int? startTime;
   final bool endUsed;
@@ -10,7 +10,7 @@ class ScheduleTile extends StatelessWidget {
   final VoidCallback? onTap;
   final String? lateCommet;
 
-  const ScheduleTile({
+  const UpcomingScheduleCard({
     required this.title,
     required this.startTime,
     required this.endUsed,
@@ -31,19 +31,20 @@ class ScheduleTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
         ),
         width: double.infinity,
-        height: 90,
-        padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.symmetric(vertical: 5),
+        height: double.infinity,
+        padding: const EdgeInsets.all(13),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 25)),
-            Row(
+            Text(title, style: const TextStyle(fontSize: 20)),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(_formatTime(startTime)),
-                if (endUsed) Text(" ~ ${_formatTime(endTime)}"),
-                if (lateCommet != null) Text(' 사유 : $lateCommet'),
+                Text(_formatTime(startTime),style: const TextStyle(fontSize: 12)),
+                if (endUsed) Text(" ~ ${_formatTime(endTime)}",style: const TextStyle(fontSize: 11)),
+                if (lateCommet != null) Text(' 사유 : $lateCommet',style: const TextStyle(fontSize: 11)),
               ],
             ),
           ],

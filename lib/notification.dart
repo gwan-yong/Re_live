@@ -97,6 +97,9 @@ void showScheduledNotification(
   );
   // 예약 시간 timezone 형식으로 변환
   final scheduledDate = tz.TZDateTime.from(scheduledDateTime, tz.local);
+  if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
+    return;
+  }
 
   // 알림 등록
   await notifications.zonedSchedule(
@@ -155,6 +158,11 @@ void showMissedScheduleNotification(
 
   final scheduledDate = tz.TZDateTime.from(notificationTime, tz.local);
 
+  if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
+
+    return;
+  }
+
   // 알림 등록
   await notifications.zonedSchedule(
     missedNotificationId,
@@ -167,6 +175,5 @@ void showMissedScheduleNotification(
     UILocalNotificationDateInterpretation.absoluteTime,
     payload: payload,
   );
-  print('${scheduledTitle}놓친 알림등록됨');
-  print('payload${payload}');
+  print('${scheduledTitle}놓친 알림등록됨1');
 }

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
@@ -94,6 +95,83 @@ class LocalDatabase extends _$LocalDatabase {
       ..sort((a, b) => a.startTime.compareTo(b.startTime));
   }
 
+  Future<List<DateTime>> getDatesWithSchedules({int limit = 300}) async {
+    final allSchedules = await select(upcomingScheduled).get();
+    final completed = await select(completedScheduled).get();
+
+    final Set<DateTime> resultDates = {};
+
+    // completed scheduleId별 완료 날짜 맵으로 빠른 검색 가능하게 준비
+    final Map<int, List<DateTime>> completedDatesByScheduleId = {};
+    for (final c in completed) {
+      final scheduleId = c.scheduledId;
+      if (scheduleId == null) continue; // null이면 건너뛰기
+
+      completedDatesByScheduleId.putIfAbsent(scheduleId, () => []);
+      completedDatesByScheduleId[scheduleId]!.add(DateTime(c.takenAt.year, c.takenAt.month, c.takenAt.day));
+    }
+    // 1년 정도 범위만 검사 (원하는 기간 설정 가능)
+    final now = DateTime.now();
+    final startSearchDate = now.subtract(Duration(days: 365));
+    final endSearchDate = now.add(Duration(days: 365));
+
+    DateTime currentDate = startSearchDate;
+
+    while (!currentDate.isAfter(endSearchDate) && resultDates.length < limit) {
+      for (final s in allSchedules) {
+        final normalizedCurrentDate = DateTime(currentDate.year, currentDate.month, currentDate.day);
+        final startDate = DateTime(s.date.year, s.date.month, s.date.day);
+        final isAfterStart = !normalizedCurrentDate.isBefore(startDate);
+
+        // 반복 종료 조건 체크
+        if (s.repeatEndUsed &&
+            s.repeatEndDate != null &&
+            normalizedCurrentDate.isAfter(DateTime(s.repeatEndDate!.year, s.repeatEndDate!.month, s.repeatEndDate!.day))) {
+          continue;
+        }
+
+        // 이미 완료된 일정은 제외
+        final completedDates = completedDatesByScheduleId[s.id] ?? [];
+        if (completedDates.contains(normalizedCurrentDate)) continue;
+
+        bool matches = false;
+
+        switch (s.repeatType) {
+          case '없음':
+            matches = startDate == normalizedCurrentDate;
+            break;
+          case '매일':
+            matches = isAfterStart;
+            break;
+          case '매주':
+            matches = isAfterStart && startDate.weekday == normalizedCurrentDate.weekday;
+            break;
+          case '매월':
+            matches = isAfterStart && startDate.day == normalizedCurrentDate.day;
+            break;
+          case '매년':
+            matches = isAfterStart &&
+                startDate.month == normalizedCurrentDate.month &&
+                startDate.day == normalizedCurrentDate.day;
+            break;
+          default:
+            matches = false;
+        }
+
+        if (matches) {
+          resultDates.add(normalizedCurrentDate);
+          if (resultDates.length >= limit) break;
+        }
+      }
+      currentDate = currentDate.add(Duration(days: 1));
+    }
+
+    final sortedDates = resultDates.toList()..sort();
+
+    return sortedDates;
+  }
+
+
   //현재 진행중인 일정 가져오기
   Future<UpcomingScheduledData?> getCurrentRunningSchedule() async {
     final now = DateTime.now();
@@ -130,6 +208,7 @@ class LocalDatabase extends _$LocalDatabase {
     await (update(upcomingScheduled)..where((tbl) => tbl.id.equals(id)))
         .write(newValues);
   }
+
 
   //등록하지 못한 일정 가져오기
   Future<List<UpcomingScheduledData>> getTodayLateSchedules() async {
@@ -170,8 +249,9 @@ class LocalDatabase extends _$LocalDatabase {
     ); // 선택 날짜 다음날 00:00
 
     return await (select(completedScheduled)
-      ..where(
-            (tbl) => tbl.takenAt.isBetweenValues(selectDay, selectDayTomorrow),
+      ..where((tbl) =>
+      tbl.takenAt.isBetweenValues(selectDay, selectDayTomorrow) &
+      tbl.notDisplay.equals(false) // notDisplay == false 인 조건 추가
       )
       ..orderBy([
             (tbl) => OrderingTerm(expression: tbl.takenAt), // 오름차순 정렬
@@ -225,6 +305,28 @@ class LocalDatabase extends _$LocalDatabase {
     return (select(journal)
       ..where((j) => j.date.isBetweenValues(start, end)))
         .getSingleOrNull();
+  }
+
+  Future<List<DateTime?>> getDistinctJournalDates() async {
+    final query = selectOnly(journal, distinct: true)
+      ..addColumns([journal.date]);
+
+    final rows = await query.get();
+
+    final dates = rows.map((row) => row.read(journal.date)).toList();
+
+    return dates;
+  }
+
+  Future<void> updateJournalByDate(DateTime targetDate, JournalCompanion newValues) async {
+    final startOfDay = DateTime(targetDate.year, targetDate.month, targetDate.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    await (update(journal)
+      ..where((tbl) =>
+      tbl.date.isBiggerOrEqualValue(startOfDay) &
+      tbl.date.isSmallerThanValue(endOfDay)))
+        .write(newValues);
   }
 
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:re_live/controller/card_carousel_controller.dart';
 import 'package:re_live/controller/db_journal_controller.dart';
 import 'package:re_live/screen/home_screen.dart';
 
@@ -23,7 +24,7 @@ void main() async {
   Get.put(DbCompleteScheduleController());
   Get.put(DbJournalController());
   Get.put(NotificationController());
-
+  Get.put(CardCarouselController());
 
 
   runApp(

@@ -1,14 +1,19 @@
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:re_live/controller/select_schedule_controller.dart';
 import 'package:re_live/services/database_service.dart';
 import '../database/drift_database.dart';
+import '../widget/common/date_circular_dial.dart';
+import 'db_journal_controller.dart';
 import 'notification_controller.dart';
 
 class DbUpcomingScheduleController extends GetxController {
   static DbUpcomingScheduleController get to => Get.find();
 
+  var allUpcomingSchedules = <UpcomingScheduledData>[].obs;
   var upcomingSchedules = <UpcomingScheduledData>[].obs;
   var lateSchedules = <UpcomingScheduledData>[].obs;
+  RxList<DateTime?> UpcomingSchedulesDates = <DateTime?>[].obs;
   Rx<DateTime> get selectDate => SelectScheduleController.to.selectDate;
 
   @override
@@ -16,24 +21,36 @@ class DbUpcomingScheduleController extends GetxController {
     super.onInit();
     // 날짜가 바뀔 때마다 자동으로 일정 로딩
     ever(selectDate, (_) {
-      loadSchedules();
+      loadNowSchedules();
+      loadAllSchedules();
+      loadSchedulesDates();
     });
 
     // 초기 로딩
-    loadSchedules();
+    loadNowSchedules();
     loadLateSchedules();
+    loadSchedulesDates();
+    loadAllSchedules();
   }
 
-  Future<void> loadSchedules() async {
+  Future<void> loadNowSchedules() async {
     final db = DatabaseService.to.db;
     upcomingSchedules.value = await db.getSchedulesByDate(selectDate.value);
   }
 
+  Future<void> loadAllSchedules() async {
+    final db = DatabaseService.to.db;
+    allUpcomingSchedules.value = await db.getAllSchedules();
+  }
+
+
   Future<void> addSchedule(UpcomingScheduledCompanion schedule) async {
     final db = DatabaseService.to.db;
     await db.insertSchedule(schedule);
-    await loadSchedules();
+    await loadNowSchedules();
+    await loadAllSchedules();
     await NotificationController.to.refresh();
+    await loadSchedulesDates();
     print("${schedule.title} 일정이 추가됨");
   }
 
@@ -41,11 +58,13 @@ class DbUpcomingScheduleController extends GetxController {
     final db = DatabaseService.to.db;
     await db.deleteSchedule(id);
     await NotificationController.to.refresh();
+    await loadSchedulesDates();
+    await DbJournalController.to.loadJournalDates();
     print("일정 id ${id} 가 삭제됨");
   }
 
   Future<UpcomingScheduledData?> searchSchedule(int id) async {
-    await loadSchedules();
+    await loadNowSchedules();
     try {
       return upcomingSchedules.firstWhere((schedule) => schedule.id == id);
     } catch (e) {
@@ -67,9 +86,39 @@ class DbUpcomingScheduleController extends GetxController {
   Future<void> updateSchedule(int id, UpcomingScheduledCompanion newValues) async {
     final db = DatabaseService.to.db;
     await db.updateSchedule(id, newValues);
-    loadSchedules();
+    await loadNowSchedules();
+    await loadSchedulesDates();
   }
 
+  String? getScheduleTitleById(int id) {
+    try {
+      final schedule = allUpcomingSchedules.firstWhere((s) => s.id == id);
+      return schedule.title;
+    } catch (e) {
+      return null;
+    }
+  }
 
+  int? getScheduleColorById(int id) {
+    try {
+      final schedule = allUpcomingSchedules.firstWhere((s) => s.id == id);
+      return schedule.color;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> loadSchedulesDates() async {
+    final db = DatabaseService.to.db;
+    final rawDates = await db.getDatesWithSchedules();
+
+    // null 제거 후 DateTime만 필터링
+    final dates = rawDates.whereType<DateTime>().toList();
+
+    dates.sort((a, b) => a.compareTo(b));
+
+    UpcomingSchedulesDates.assignAll(dates);
+    print('UpcomingSchedulesDates : $UpcomingSchedulesDates');
+  }
 
 }

@@ -8,6 +8,7 @@ import 'package:re_live/controller/db_upcoming_schedule_controller.dart';
 import '../database/drift_database.dart';
 import '../notification.dart';
 import '../theme/colors.dart';
+import 'package:re_live/widget/scheduled_cards/complete_scheduled_card.dart';
 import 'home_screen.dart'; // DB 접근을 위한 임포트
 
 class PhotosUploadScreen extends StatelessWidget {
@@ -24,16 +25,21 @@ class PhotosUploadScreen extends StatelessWidget {
     final CompletedPhotos = await LocalDatabase().getAllCompletePhotos();
     for (final completedPhoto in CompletedPhotos) {
       print(
-        'ID: ${completedPhoto.id},'
-            ' scheduledId: ${completedPhoto.scheduledId},'
-            ' frontImgPath: ${completedPhoto.frontImgPath},'
-            ' rearImgPath: ${completedPhoto.rearImgPath}'
-            ' stakenAt : ${completedPhoto.takenAt },'
+          'ID: ${completedPhoto.id},'
+              ' scheduledId: ${completedPhoto.scheduledId},'
+              ' frontImgPath: ${completedPhoto.frontImgPath},'
+              ' rearImgPath: ${completedPhoto.rearImgPath}'
+              ' stakenAt : ${completedPhoto.takenAt },'
       );
     }
   }
 
-  Future<String> _saveImageToInternalStorage(File imageFile, String label) async {
+  Future<String?> _saveImageToInternalStorage(File imageFile,
+      String label) async {
+    if (!await imageFile.exists()) {
+      return null; // 파일이 없으면 null 반환
+    }
+
     final dir = await getApplicationSupportDirectory();
     final photoDir = Directory('${dir.path}/app_data/photos');
     if (!await photoDir.exists()) {
@@ -52,7 +58,6 @@ class PhotosUploadScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder<UpcomingScheduledData?>(
       future: DbUpcomingScheduleController.to.getCurrentRunning(),
       builder: (context, snapshot) {
@@ -73,15 +78,6 @@ class PhotosUploadScreen extends StatelessWidget {
         final title = schedule?.title ?? '예정 없음';
         final color = Color(schedule?.color ?? 0xFFCCCCCC);
 
-        final startTime = schedule?.startTime != null
-            ? _formatTime(schedule!.startTime!)
-            : _getCurrentFormattedTime();
-
-        final endTime = schedule?.endTime != null
-            ? _formatTime(schedule!.endTime!)
-            : _getCurrentFormattedTime();
-
-        final endUsed = schedule?.endUsed ?? false;
 
         return Scaffold(
           backgroundColor: Colors.white,
@@ -92,37 +88,43 @@ class PhotosUploadScreen extends StatelessWidget {
           body: SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: _PreviewPhotos(
-                    rearImagePath: rearImagePath,
-                    frontImagePath: frontImagePath,
+                Center(
+                  child: Container(
+                    height: 609,
+                    width: 330,
+                    child: Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: CompleteScheduledCard(
+                        rearimgPath: rearImagePath,
+                        frontimgPath: frontImagePath,
+                        title: title,
+                        color: color,
+                        takenAt: _getCurrentFormattedTime(),
+                        bigFont: true,
+                      ),
+                    ),
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 25 , vertical: 1),
-                  child: Text(
-                      '업로드 할 일정'
-                  ),
-                ),
-                _EventTile(title, startTime, endUsed, endTime, color),
                 SizedBox(
                   height: 15,
                 ),
                 GestureDetector(
                   onTap: () async {
                     // 이미지 저장 경로 얻기
-                    final rearPath = await _saveImageToInternalStorage(File(rearImagePath), "rear");
-                    final frontPath = await _saveImageToInternalStorage(File(frontImagePath), "front");
+                    final rearPath = await _saveImageToInternalStorage(
+                        File(rearImagePath), "rear");
+                    final frontPath = await _saveImageToInternalStorage(
+                        File(frontImagePath), "front");
 
                     print("저장된 후면 사진 경로: $rearPath");
                     print("저장된 전면 사진 경로: $frontPath");
 
 
                     // _getCurrentRunningSchedule에서 scheduledId 가져오기
-                    final currentSchedule = await DbUpcomingScheduleController.to.getCurrentRunning();
+                    final currentSchedule = await DbUpcomingScheduleController
+                        .to.getCurrentRunning();
 
                     final newCompleteSchedule = (CompletedScheduledCompanion(
                       scheduledId: drift.Value(currentSchedule?.id),
@@ -132,11 +134,13 @@ class PhotosUploadScreen extends StatelessWidget {
                     ));
 
                     // CompletePhotos 테이블에 데이터 추가
-                    await DbCompleteScheduleController.to.addCompleteSchedule(newCompleteSchedule);
+                    await DbCompleteScheduleController.to.addCompleteSchedule(
+                        newCompleteSchedule);
 
 
                     if (currentSchedule != null) {
-                      await notifications.cancel(currentSchedule.id + 10000); // 해당 ID의 놓친 일정 알림 삭제
+                      await notifications.cancel(
+                          currentSchedule.id + 10000); // 해당 ID의 놓친 일정 알림 삭제
                       print('일정 완료 처리됨');
                     } else {
                       print('현재 진행 중인 일정이 없습니다.');
@@ -169,15 +173,6 @@ class PhotosUploadScreen extends StatelessWidget {
     );
   }
 
-  // "오전 6:00" 같은 형식으로 시간 포맷
-  String _formatTime(int rawTime) {
-    final hour = rawTime ~/ 60;
-    final minute = rawTime % 60;
-    final time = TimeOfDay(hour: hour, minute: minute);
-    final now = DateTime.now();
-    final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-    return DateFormat.jm('ko').format(dt);
-  }
 
   // 현재 시간을 "오전 11:03" 같은 형식으로 리턴
   String _getCurrentFormattedTime() {
@@ -185,89 +180,4 @@ class PhotosUploadScreen extends StatelessWidget {
     return DateFormat.jm('ko').format(now);
   }
 
-  // 일정 박스
-  Widget _EventTile(String title, String startTime, bool endUsed, String endTime, Color color) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      width: double.infinity,
-      height: 90,
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(fontSize: 25)),
-          Row(
-            children: [
-              Text(startTime),
-              if (endUsed) Text(" ~ $endTime"),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// 미리보기 사진 위젯
-class _PreviewPhotos extends StatelessWidget {
-  final String rearImagePath;
-  final String frontImagePath;
-
-  const _PreviewPhotos({
-    required this.rearImagePath,
-    required this.frontImagePath,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 353,
-      height: 463,
-      child: Stack(
-        children: [
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            margin: const EdgeInsets.symmetric(horizontal: 5),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black, width: 3),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(13),
-              child: Image.file(
-                File(rearImagePath),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 5,
-            right: 10,
-            child: Container(
-              width: 133,
-              height: 172,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 3),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(13),
-                child: Image.file(
-                  File(frontImagePath),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

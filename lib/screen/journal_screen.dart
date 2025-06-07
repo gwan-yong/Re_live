@@ -1,10 +1,11 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:re_live/theme/colors.dart';
-import 'package:re_live/widget/schedule/missed_scheduled_list.dart';
 import '../controller/db_journal_controller.dart';
 import '../database/drift_database.dart';
-import '../widget/schedule/completed_scheduled_list.dart';
+import '../widget/common/card_circular_carousel.dart';
+import '../controller/select_schedule_controller.dart';
 import 'home_screen.dart';
 
 class JournalScreen extends StatelessWidget{
@@ -32,14 +33,17 @@ class JournalScreen extends StatelessWidget{
                       '오늘 진행된 일정'
                   ),
                 ),
-                CompletedScheduledList(),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  child: Text(
-                      '소화하지 못한 일정'
-                  ),
-                ),
-                MissedScheduledList(),
+                /*Obx(() {
+                  SelectScheduleController.to.selectDate.value = DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day);
+                  final selectedDate =
+                      SelectScheduleController.to.selectDate.value;
+                  return
+                    CardCircularCarousel(
+                      key: ValueKey(selectedDate),
+                      scale: 0.7,
+                    );
+                }),*/
+                //CompletedScheduledList(),
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   child: Text(
