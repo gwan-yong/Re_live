@@ -8,7 +8,7 @@ import 'package:re_live/controller/db_upcoming_schedule_controller.dart';
 import '../database/drift_database.dart';
 import '../notification.dart';
 import '../theme/colors.dart';
-import '../widget/schedule/complete_scheduled_card.dart';
+import 'package:re_live/widget/scheduled_cards/complete_scheduled_card.dart';
 import 'home_screen.dart'; // DB 접근을 위한 임포트
 
 class PhotosUploadScreen extends StatelessWidget {

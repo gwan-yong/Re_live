@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../controller/card_carousel_controller.dart';
 import '../widget/schedule_setting/date_setting.dart';
 import '../widget/schedule_setting/repeat_setting.dart';
 import '../controller/db_complete_schedule_controller.dart';
@@ -225,6 +226,7 @@ class _ScheduledDetailScreenState extends State<ScheduledDetailScreen> {
             await DbUpcomingScheduleController.to.addSchedule(newSchedule);
             _navigateHome();
           }
+          CardCarouselController.to.setScale (1);
         },
         child: Container(
           width: 168,

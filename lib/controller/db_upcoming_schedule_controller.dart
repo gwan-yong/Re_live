@@ -1,7 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:re_live/controller/select_schedule_controller.dart';
 import 'package:re_live/services/database_service.dart';
 import '../database/drift_database.dart';
+import '../widget/common/date_circular_dial.dart';
+import 'db_journal_controller.dart';
 import 'notification_controller.dart';
 
 class DbUpcomingScheduleController extends GetxController {
@@ -20,6 +23,7 @@ class DbUpcomingScheduleController extends GetxController {
     ever(selectDate, (_) {
       loadNowSchedules();
       loadAllSchedules();
+      loadSchedulesDates();
     });
 
     // 초기 로딩
@@ -55,6 +59,7 @@ class DbUpcomingScheduleController extends GetxController {
     await db.deleteSchedule(id);
     await NotificationController.to.refresh();
     await loadSchedulesDates();
+    await DbJournalController.to.loadJournalDates();
     print("일정 id ${id} 가 삭제됨");
   }
 

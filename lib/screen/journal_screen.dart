@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:re_live/theme/colors.dart';
 import '../controller/db_journal_controller.dart';
 import '../database/drift_database.dart';
-import '../widget/schedule/card_circular_carousel.dart';
+import '../widget/common/card_circular_carousel.dart';
 import '../controller/select_schedule_controller.dart';
 import 'home_screen.dart';
 

@@ -8,7 +8,7 @@ import '../controller/db_complete_schedule_controller.dart';
 import '../database/drift_database.dart';
 import '../notification.dart';
 import '../theme/colors.dart';
-import '../widget/schedule/complete_scheduled_photo.dart';
+import 'package:re_live/widget/scheduled_cards/complete_scheduled_photo.dart';
 import 'home_screen.dart';
 
 class MissedScheduledScreen extends StatefulWidget {

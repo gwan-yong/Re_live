@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:re_live/controller/db_journal_controller.dart';
 import 'package:re_live/controller/db_upcoming_schedule_controller.dart';
-import 'package:re_live/widget/schedule/rotating_dial.dart';
+import 'package:re_live/widget/common/rotating_dial.dart';
 
-import '../controller/select_schedule_controller.dart';
+import '../../controller/select_schedule_controller.dart';
 
 class DateCircularDial extends StatefulWidget {
+  final VoidCallback? onCenterTap;
+
+  const DateCircularDial({Key? key, this.onCenterTap}) : super(key: key);
+
   @override
   State<DateCircularDial> createState() => _DateCircularDialState();
 }
@@ -24,11 +28,6 @@ class _DateCircularDialState extends State<DateCircularDial> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     screenWidth = MediaQuery.of(context).size.width;
-
-
-
-
-
 
   }
 
@@ -72,6 +71,10 @@ class _DateCircularDialState extends State<DateCircularDial> {
     }
   }
 
+  void fun1 (){
+    widget.onCenterTap?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -94,7 +97,10 @@ class _DateCircularDialState extends State<DateCircularDial> {
 
       // 둘 다 비어 있으면 아무것도 출력하지 않음
       if (allDates.isEmpty) {
-        return SizedBox.shrink();
+        return  Container(
+          height: 300,
+            width: 400,
+        );
       }
 
       return Column(
@@ -113,19 +119,13 @@ class _DateCircularDialState extends State<DateCircularDial> {
                       .whereType<DateTime>()
                       .toList();
 
-              // ✅ 날짜 콘솔 출력
               if (index < journalDates.length) {
                 SelectScheduleController.to.selectDate.value =
                     journalDates[index];
-                /*print(
-                  '🎯 Center Date (from journalDates): ${journalDates[index]}',
-                );*/
+
               } else if (index - journalDates.length < scheduleDates.length) {
                 SelectScheduleController.to.selectDate.value =
                     scheduleDates[index - journalDates.length];
-                /*print(
-                  '🎯 Center Date (from scheduleDates): ${scheduleDates[index - journalDates.length]}',
-                );*/
               } else {
                 print('⚠️ Index out of bounds');
               }
@@ -136,27 +136,6 @@ class _DateCircularDialState extends State<DateCircularDial> {
               animation: _scrollController,
               builder: (context, child) {
                 int centerIndex = getCenterIndex();
-
-
-                /*if (centerIndex != lastCenterIndex) {
-                  lastCenterIndex = centerIndex;
-
-                  final journalDates = DbJournalController.to.journalDates
-                      .whereType<DateTime>().toList();
-                  final scheduleDates = DbUpcomingScheduleController.to
-                      .UpcomingSchedulesDates.whereType<DateTime>().toList();
-
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (centerIndex < journalDates.length) {
-                      SelectScheduleController.to.selectDate.value =
-                      journalDates[centerIndex];
-                    } else if (centerIndex - journalDates.length <
-                        scheduleDates.length) {
-                      SelectScheduleController.to.selectDate.value =
-                      scheduleDates[centerIndex - journalDates.length];
-                    }
-                  });
-                }*/
 
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -254,7 +233,10 @@ class _DateCircularDialState extends State<DateCircularDial> {
               ),
             ),
           ),
-          RotatingDial(size: 100),
+          RotatingDial(
+            size: 100,
+            onCenterTap: fun1,
+          ),
         ],
       );
     });

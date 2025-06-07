@@ -1,6 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:re_live/widget/schedule/complete_scheduled_photo.dart';
+import 'package:re_live/widget/scheduled_cards/complete_scheduled_photo.dart';
 
 class CompleteScheduledCard extends StatelessWidget {
   final String? rearimgPath;

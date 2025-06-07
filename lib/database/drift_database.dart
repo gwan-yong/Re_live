@@ -318,6 +318,17 @@ class LocalDatabase extends _$LocalDatabase {
     return dates;
   }
 
+  Future<void> updateJournalByDate(DateTime targetDate, JournalCompanion newValues) async {
+    final startOfDay = DateTime(targetDate.year, targetDate.month, targetDate.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    await (update(journal)
+      ..where((tbl) =>
+      tbl.date.isBiggerOrEqualValue(startOfDay) &
+      tbl.date.isSmallerThanValue(endOfDay)))
+        .write(newValues);
+  }
+
 }
 
 LazyDatabase _openConnection() {

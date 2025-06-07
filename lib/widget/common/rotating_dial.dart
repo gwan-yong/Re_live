@@ -5,8 +5,9 @@ import '../../controller/card_carousel_controller.dart';
 
 class RotatingDial extends StatefulWidget {
   final double size;
+  final VoidCallback? onCenterTap;
 
-  const RotatingDial({Key? key, this.size = 200}) : super(key: key);
+  const RotatingDial({Key? key, this.size = 200, this.onCenterTap}) : super(key: key);
 
   @override
   State<RotatingDial> createState() => _RotatingDialState();
@@ -18,6 +19,16 @@ class _RotatingDialState extends State<RotatingDial> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTapDown: (details) {
+        RenderBox box = context.findRenderObject() as RenderBox;
+        center = box.size.center(Offset.zero);
+        final touchPoint = details.localPosition;
+        final distance = (touchPoint - center).distance;
+        // 중심 반지름 40 이내 클릭 시 onCenterTap 호출
+        if (distance < 10.0) {
+          widget.onCenterTap?.call();
+        }
+      },
       onPanStart: (details) {
         RenderBox box = context.findRenderObject() as RenderBox;
         center = box.size.center(Offset.zero);
