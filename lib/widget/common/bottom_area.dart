@@ -121,11 +121,9 @@ class _BottomAreaState extends State<BottomArea> with TickerProviderStateMixin {
       _showDial = false;
       _showCalendar = true;
     });
-
-
     widget.onCalendarOpened?.call();
-
     await _calendarController.forward();
+
   }
 
   void _onBackPressed() async {

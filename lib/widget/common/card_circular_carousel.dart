@@ -13,11 +13,12 @@ class CardCircularCarousel extends StatefulWidget {
   final double scale;
   final double cardPadding;
 
-  const CardCircularCarousel({
-    Key? key,
+  CardCircularCarousel({
+    //Key? key,
+    super.key,
     required this.scale,
     required this.cardPadding,
-  }) : super(key: key);
+  });// : super(key: key);
 
   @override
   State<CardCircularCarousel> createState() => _CardCircularCarouselState();
@@ -29,12 +30,7 @@ class _CardCircularCarouselState extends State<CardCircularCarousel> {
   late double screenWidth;
   double cardWidth = 0;
   double cardCenterOffset = 0;
-  double cardSpacing = 0;
 
-  /*List<Widget> items1 = [];
-  List<Widget> items2 = [];
-  Widget? item3;
-  List<Widget> combinedItems = [];*/
   bool isAnimating = false;
 
   @override
@@ -49,58 +45,6 @@ class _CardCircularCarouselState extends State<CardCircularCarousel> {
       }
     });
   }
-
-  /*void _loadItems() {
-    if (!mounted) return;
-    items1 = CompletedScheduledListItems.build();
-    items2 = UpcomingScheduledListItems.build(context);
-    item3 = JournalCard();
-
-    if (items1.isEmpty && items2.isEmpty) {
-      combinedItems = [];
-    } else if (items1.isNotEmpty && items2.isEmpty && item3 != null) {
-      combinedItems = [...items1, item3!];
-      addJournal ();
-    } else {
-      combinedItems = [...items1, ...items2];
-    }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        int indexToScroll = 0;
-        if (items2.isNotEmpty) {
-          indexToScroll = items1.length;
-        } else if (items2.isEmpty && items1.isNotEmpty && item3 != null) {
-          indexToScroll = combinedItems.length - 1;
-        }
-        scrollToIndex(indexToScroll + 1, 700);
-        print("scroll1");
-      }
-    });
-  }*/
-
-  /*Future<void> addJournal() async {
-    final today = DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      DateTime.now().day,
-    );
-
-    // 이미 오늘 날짜의 일기가 존재하는지 확인
-    await DbJournalController.to.searchJournal(today);
-    if (DbJournalController.to.journal.value != null) {
-      return;
-    }
-
-    final newJournal = JournalCompanion(
-      date: drift.Value(today),
-      comment: drift.Value("오늘 하루에 대한 느낌점을 입력해주세요!"),
-    );
-
-    await DbJournalController.to.addJournal(newJournal);
-    _loadItems();
-  }*/
-
 
   Map<String, dynamic> getCenterItemInfo() {
     int centerIndex = getCenterIndex();
@@ -129,29 +73,25 @@ class _CardCircularCarouselState extends State<CardCircularCarousel> {
   }
 
 
-
   int getCenterIndex() {
-    if (!_scrollController.hasClients || cardSpacing == 0) return 0;
+    if (!_scrollController.hasClients || CardCarouselController.to.cardSpacing.value == 0) return 0;
     if (_scrollController.hasClients) {
-      CardCarouselController.to.updateMaxExtent(
-        _scrollController.position.maxScrollExtent,
-      );
+      CardCarouselController.to.updateMaxExtent(_scrollController.position.maxScrollExtent);
     }
     double scrollOffset = _scrollController.offset;
     if (scrollOffset < cardCenterOffset) return 0;
 
-    for (int i = 1; i < CardCarouselController.to.items1.length; i++) {
-      double start =
-          cardCenterOffset +
-          (cardSpacing + CardCarouselController.to.cardPadding.value) * (i - 1);
-      double end =
-          cardCenterOffset +
-          (cardSpacing + CardCarouselController.to.cardPadding.value) * i;
+    for (int i = 1; i < CardCarouselController.to.combinedItems.length; i++) {
+      double start = cardCenterOffset + (CardCarouselController.to.cardSpacing.value+CardCarouselController.to.cardPadding.value) * (i - 1);
+      double end = cardCenterOffset + (CardCarouselController.to.cardSpacing.value+CardCarouselController.to.cardPadding.value) * i;
       if (scrollOffset >= start && scrollOffset < end) return i;
     }
 
     return CardCarouselController.to.combinedItems.length - 1;
   }
+
+
+
 
   double getYOffsetForIndex(int index, int centerIndex) {
     int relativeIndex = index - centerIndex;
@@ -167,7 +107,7 @@ class _CardCircularCarouselState extends State<CardCircularCarousel> {
     return sin(normalized * pi / 2) * maxAngle;
   }
 
-  void scrollToIndex(int index, int duration) {
+  /*void scrollToIndex(int index, int duration) {
     if (_scrollController.hasClients) {
       CardCarouselController.to.updateMaxExtent(
         _scrollController.position.maxScrollExtent,
@@ -191,7 +131,7 @@ class _CardCircularCarouselState extends State<CardCircularCarousel> {
         );
       }
     });
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -232,14 +172,15 @@ class _CardCircularCarouselState extends State<CardCircularCarousel> {
         isAnimating = false;
       },
       builder: (context, animatedScale, child) {
-        scrollToIndex(CardCarouselController.to.lastIndex.value, 0); //scroll2
+        //scrollToIndex(CardCarouselController.to.lastIndex.value, 0); //scroll2
+        CardCarouselController.to.scrollToIndex(CardCarouselController.to.lastIndex.value, 0);
         //print("scroll2 ${CardCarouselController.to.lastIndex.value}");
         isAnimating = true;
         screenWidth = baseScreenWidth * animatedScale;
         cardWidth = screenWidth / 2.5;
         double cardHeight = cardWidth * 24 / 13;
         cardCenterOffset = cardWidth / 2 - 10;
-        cardSpacing = cardWidth - 20;
+        CardCarouselController.to.cardSpacing.value = cardWidth - 20;
         double leftPadding = baseScreenWidth / 2 - cardWidth / 2;
 
         return Column(
@@ -253,7 +194,7 @@ class _CardCircularCarouselState extends State<CardCircularCarousel> {
                 Future.delayed(const Duration(milliseconds: 20), () {
                   if (isAnimating!) {
                     final index = getCenterIndex();
-                    scrollToIndex(index + 1, 500);
+                    CardCarouselController.to.scrollToIndex(index + 1, 500);
                     CardCarouselController.to.lastIndex.value = index + 1;
                     /*print(
                       "scroll3 ${CardCarouselController.to.lastIndex.value}",

@@ -11,6 +11,7 @@ import 'db_journal_controller.dart';
 class CardCarouselController extends GetxController {
   static CardCarouselController get to => Get.find<CardCarouselController>();
   final RxDouble cardCarouselScale = 1.0.obs;
+  final RxDouble cardSpacing = 0.0.obs;
   final RxDouble cardPadding = 0.0.obs;
   final RxDouble scrollAngle = 0.0.obs;
   final RxDouble maxScrollExtent = 1.0.obs;
@@ -94,6 +95,29 @@ class CardCarouselController extends GetxController {
     // item3 및 리스트 다시 갱신
     item3.value = JournalCard();
     combinedItems.value = [...items1, item3.value!];
+  }
+
+  void scrollToIndex(int index, int duration) {
+    final controller = scrollController.value;
+    if (controller == null || !controller.hasClients) return;
+
+    updateMaxExtent(controller.position.maxScrollExtent);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      double targetOffset = index <= 1
+          ? 0
+          : (cardSpacing.value + cardPadding.value) * (index - 1);
+
+      if (duration <= 0) {
+        controller.jumpTo(targetOffset);
+      } else {
+        controller.animateTo(
+          targetOffset,
+          duration: Duration(milliseconds: duration),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
 
