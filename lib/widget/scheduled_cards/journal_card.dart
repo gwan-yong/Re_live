@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ios_color_picker/custom_picker/shared.dart';
@@ -32,10 +33,27 @@ class JournalCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('오늘 느낌점 작성하기', style: TextStyle(fontSize: 25)),
-              Padding(
-                padding: const EdgeInsets.all(40.0),
-                child: Center(child: const Icon(Icons.add)),
+              //const Text('오늘 느낌점 작성하기', style: TextStyle(fontSize: 25)),
+              AutoSizeText(
+                '오늘 느낌점 작성하기',
+                style: TextStyle(fontSize: 25),
+                minFontSize: 13,
+                maxFontSize: 25,
+                maxLines: 2,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              SizedBox(
+                child: Center(
+                  child: AutoSizeText(
+                    '+',
+                    style: TextStyle(fontSize: 40),
+                    minFontSize: 13,
+                    maxFontSize: 40,
+                    maxLines: 1,
+                  ),
+                ),
               ),
             ],
           ),
